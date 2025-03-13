@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Monash University Clubs Voting System</title>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f6f9; /* 统一背景色 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      max-width: 480px;
+      width: 100%;
+      padding: 30px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .logo {
+      height: 60px; /* Logo 高度适中 */
+      margin-bottom: 15px;
+    }
+
+    .login-container h1 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #00274d; /* 标题颜色与 Monash 主题一致 */
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #bbb; /* 让边框稍微深一点 */
+      border-radius: 6px;
+      font-size: 16px;
+      text-align: left;
+      box-sizing: border-box;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 12px;
+      background-color: #00274d; /* 深蓝色，统一主题 */
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .login-container button:hover {
+      background-color: #001a33;
+    }
+
+    .links {
+      margin-top: 15px;
+    }
+
+    .links a {
+      color: #00274d;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+
+    .footer-links {
+      margin-top: 20px;
+      font-size: 13px;
+    }
+
+    .footer-links a {
+      color: #00274d;
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <img src="monash-logo2.png" alt="Monash University Logo" class="logo">
+    <h1>Monash University Clubs Voting System</h1>
+    <input type="text" placeholder="Username" required>
+    <input type="password" placeholder="Password" required>
+    <input type="text" placeholder="Multi-factor Authentication Code">
+    <button>Login</button>
+    <div class="links">
+      <a href="#">Login as Admin</a> | 
+      <a href="#">Forgot Password?</a> | 
+      <a href="#">New user? Register here</a>
+    </div>
+    <div class="footer-links">
+      <a href="#">Accessibility</a> | 
+      <a href="#">Privacy Policy</a>
+    </div>
+  </div>
+</body>
+</html>
