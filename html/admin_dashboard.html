@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Monash University Voting</title>
+  <style>
+    :root {
+      --primary-color: #002f6c;
+      --secondary-color: #0077b6;
+      --background-color: #f4f7fa;
+      --white: #fff;
+      --text-color: #555;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    /* Header */
+    header {
+      background-color: var(--primary-color);
+      padding: 20px;
+      text-align: left;
+      color: var(--white);
+    }
+    .logo {
+      background-color: transparent;
+      height: 50px;
+      vertical-align: middle;
+    }
+    .header-title {
+      display: inline-block;
+      margin-left: 20px;
+      font-size: 24px;
+      vertical-align: middle;
+    }
+    /* Main Container */
+    main {
+      flex-grow: 1;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .title {
+      font-size: 28px;
+      margin-bottom: 30px;
+      color: var(--primary-color);
+      text-align: center;
+    }
+    .dashboard-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      max-width: 1200px;
+    }
+    .dashboard-section {
+      background-color: var(--white);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      flex: 1 1 100%;
+      max-width: 100%;
+    }
+    .section-title {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: var(--text-color);
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    .btn.primary {
+      background-color: var(--primary-color);
+      color: var(--white);
+    }
+    .btn.primary:hover,
+    .btn.primary:focus {
+      background-color: #001e4a;
+    }
+    .btn.grey {
+      background-color: grey;
+      color: var(--white);
+      cursor: not-allowed;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table th, table td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ccc;
+    }
+    table th {
+      background-color: #f0f0f0;
+    }
+    /* Footer */
+    footer {
+      background-color: var(--primary-color);
+      padding: 20px;
+      text-align: center;
+      color: var(--white);
+      margin-top: 40px;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .footer-link {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Section -->
+  <header>
+    <div class="logo-container">
+      <a href="/" title="Monash University Home">
+        <img src="logo.png" alt="Monash University Logo" class="logo">
+      </a>
+      <span class="header-title">Admin Dashboard - Monash University Voting</span>
+    </div>
+  </header>
+  
+  <!-- Main Content Section -->
+  <main>
+    <h2 class="title">Manage Elections</h2>
+    <div class="dashboard-grid">
+      <div class="dashboard-section">
+        <h3 class="section-title">Election Management</h3>
+        <p>View, edit, or create new elections</p>
+        <button class="btn primary">Create New Election</button>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40%;">Election Name</th>
+              <th style="width: 20%;">Status</th>
+              <th style="width: 20%;">Actions</th>
+              <th style="width: 20%;">Statistics</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Monash Debate Club - Secretary</td>
+              <td>Pending</td>
+              <td><button class="btn primary">Edit</button></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Monash Chess Club - President</td>
+              <td>Ongoing</td>
+              <td><button class="btn grey">Edit</button></td>
+              <td>
+                <button class="btn primary" onclick="window.location.href='vote_stats.html';">
+                  View Statistics
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Monash Robotics Club - Vice President</td>
+              <td>Completed</td>
+              <td><button class="btn primary">View Results</button></td>
+              <td>
+                <button class="btn primary" onclick="window.location.href='vote_stats.html';">
+                  View Statistics
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="dashboard-section">
+        <h3 class="section-title">Audit Trail</h3>
+        <p>View the log of voting activities to ensure integrity</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Action</th>
+              <th>User</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2024-09-01</td>
+              <td>Vote Cast</td>
+              <td>33****80</td>
+              <td>
+                <button class="btn primary" onclick="window.location.href='trail_detail.html';">
+                  View Details
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>2024-09-02</td>
+              <td>Vote Cast</td>
+              <td>33****73</td>
+              <td>
+                <button class="btn primary" onclick="window.location.href='trail_detail.html';">
+                  View Details
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>2024-08-31</td>
+              <td>New Voting Created</td>
+              <td>32****64</td>
+              <td>
+                <button class="btn primary" onclick="window.location.href='trail_detail.html';">
+                  View Details
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="dashboard-section">
+        <h3 class="section-title">Security &amp; User Management</h3>
+        <p>Manage voters and security settings</p>
+        <button class="btn primary">Add/Remove Users</button>
+        <p>Multi-factor authentication: <strong>Enabled</strong></p>
+        <p>Data encryption status: <strong>Secure</strong></p>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Footer Section -->
+  <footer>
+    <div class="footer-links">
+      <a href="/help" class="footer-link">Help</a>
+      <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
+    </div>
+  </footer>
+</body>
+</html>

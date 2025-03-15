@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monash University Clubs Voting System</title>
+  <style>
+    :root {
+      --primary-color: #002f6c;
+      --secondary-color: #0077b6;
+      --background-color: #f4f7fa;
+      --white: #fff;
+      --text-color: #555;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    /* Header */
+    header {
+      background-color: var(--primary-color);
+      padding: 20px;
+      color: var(--white);
+      text-align: left;
+    }
+    .logo {
+      background-color: transparent;
+      height: 50px;
+      vertical-align: middle;
+    }
+    .header-title {
+      display: inline-block;
+      margin-left: 20px;
+      font-size: 24px;
+      vertical-align: middle;
+    }
+    /* Footer */
+    footer {
+      background-color: var(--primary-color);
+      padding: 20px;
+      text-align: center;
+      color: var(--white);
+      margin-top: 40px;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .footer-link {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    /* Main Container */
+    main {
+      flex-grow: 1;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    /* Button Styles */
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .btn.primary {
+      background-color: var(--primary-color);
+      color: var(--white);
+    }
+    .btn.primary:hover,
+    .btn.primary:focus {
+      background-color: #001e4a;
+    }
+    .admin-btn {
+      margin-top: 10px;
+      font-size: 14px;
+      background-color: transparent;
+      border: none;
+      color: var(--secondary-color);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    /* Login Container */
+    .login-container {
+      background-color: var(--white);
+      padding: 40px;
+      box-shadow: var(--shadow);
+      border-radius: 10px;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      margin: auto;
+    }
+    /* Register and Forgot Password Links */
+    .forgot-password-link {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--primary-color);
+    }
+    .register-link {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .register-link a {
+      color: var(--secondary-color);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Section -->
+  <header>
+    <div class="logo-container">
+      <a href="/" title="Monash University Home">
+        <img src="logo.png" alt="Monash University Logo" class="logo">
+      </a>
+    </div>
+  </header>
+  
+  <!-- Main Content Section -->
+  <main>
+    <section class="login-container">
+      <h1>Monash University Clubs Voting System</h1>
+      <form action="/login" method="POST">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required autocomplete="current-password">
+        </div>
+        <!-- MFA input removed as it is not implemented for this project -->
+        <button type="submit" class="btn primary">Login</button>
+        <button type="button" class="admin-btn" onclick="window.location.href='admin_dashboard.html';">Login as Admin</button>
+        <a href="/forgot-password" class="forgot-password-link">Forgot Password?</a>
+      </form>
+      <p class="register-link">
+        New user? <a href="/register">Register here</a>
+      </p>
+    </section>
+  </main>
+  
+  <!-- Footer Section -->
+  <footer>
+    <div class="footer-links">
+      <a href="/accessibility" class="footer-link">Accessibility</a>
+      <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
+    </div>
+  </footer>
+</body>
+</html>
