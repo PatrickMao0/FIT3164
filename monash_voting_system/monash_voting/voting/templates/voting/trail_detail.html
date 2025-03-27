@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Audit Trail Details - Monash University Voting</title>
+  <style>
+    :root {
+      --primary-color: #002f6c;
+      --secondary-color: #0077b6;
+      --background-color: #f4f7fa;
+      --white: #fff;
+      --text-color: #555;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    
+    header {
+      background-color: var(--primary-color);
+      padding: 20px;
+      color: var(--white);
+      text-align: left;
+    }
+    
+    header .logo {
+      background-color: transparent;
+      height: 50px;
+      vertical-align: middle;
+    }
+    
+    header .header-title {
+      display: inline-block;
+      margin-left: 20px;
+      font-size: 24px;
+      vertical-align: middle;
+    }
+    
+    main {
+      flex-grow: 1;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .title {
+      font-size: 28px;
+      margin-bottom: 30px;
+      color: var(--primary-color);
+      text-align: center;
+    }
+    
+    .details-section {
+      background-color: var(--white);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    
+    .details-section h3 {
+      font-size: 22px;
+      color: var(--text-color);
+      margin-bottom: 10px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    table th,
+    table td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ccc;
+    }
+    
+    table th {
+      background-color: #f0f0f0;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      background-color: var(--primary-color);
+      color: var(--white);
+      transition: background-color 0.3s ease;
+    }
+    
+    .btn:hover,
+    .btn:focus {
+      background-color: #001e4a;
+    }
+    
+    footer {
+      background-color: var(--primary-color);
+      padding: 20px;
+      text-align: center;
+      color: var(--white);
+      margin-top: 40px;
+    }
+    
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    
+    .footer-link {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Section -->
+  <header>
+    <div class="logo-container">
+      <a href="/" title="Monash University Home">
+        <img src="logo.png" alt="Monash University Logo" class="logo" />
+      </a>
+      <span class="header-title">Audit Trail Details</span>
+    </div>
+  </header>
+
+  <!-- Main Content Section -->
+  <main>
+    <h2 class="title">Action Details</h2>
+    <!-- Details Section -->
+    <div class="details-section">
+      <h3>Audit Information</h3>
+      <table>
+        <tr>
+          <th>Date</th>
+          <td>2024-09-01</td>
+        </tr>
+        <tr>
+          <th>Action</th>
+          <td>Vote Cast</td>
+        </tr>
+        <tr>
+          <th>User</th>
+          <td>33****80</td>
+        </tr>
+        <tr>
+          <th>Voted For</th>
+          <td>John Doe (President, Monash Chess Club)</td>
+        </tr>
+        <tr>
+          <th>Time</th>
+          <td>14:35:22</td>
+        </tr>
+        <tr>
+          <th>IP Address</th>
+          <td>192.168.0.1</td>
+        </tr>
+        <tr>
+          <th>Device &amp; Browser</th>
+          <td>Chrome on Windows 10</td>
+        </tr>
+        <tr>
+          <th>Geolocation</th>
+          <td>Melbourne, Australia</td>
+        </tr>
+        <tr>
+          <th>Vote Confirmation ID</th>
+          <td>abc123def456ghi789</td>
+        </tr>
+        <tr>
+          <th>Action Source</th>
+          <td>User (Manual)</td>
+        </tr>
+        <tr>
+          <th>Outcome</th>
+          <td>Success</td>
+        </tr>
+        <tr>
+          <th>Election</th>
+          <td>Monash Chess Club - President Election 2024</td>
+        </tr>
+        <tr>
+          <th>User Role</th>
+          <td>Voter</td>
+        </tr>
+      </table>
+    </div>
+    <button class="btn" onclick="window.location.href='admin_dashboard.html#audit-trail';">Back to Audit Trail</button>
+  </main>
+
+  <!-- Footer Section -->
+  <footer>
+    <div class="footer-links">
+      <a href="/help" class="footer-link">Help</a>
+      <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
+    </div>
+  </footer>
+</body>
+</html>

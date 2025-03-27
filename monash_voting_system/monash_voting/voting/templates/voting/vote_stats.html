@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Election Statistics - Monash University Voting</title>
+  <style>
+    :root {
+      --primary-color: #002f6c;
+      --secondary-color: #0077b6;
+      --background-color: #f4f7fa;
+      --white: #fff;
+      --text-color: #555;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: var(--primary-color);
+      padding: 20px;
+      color: var(--white);
+      text-align: left;
+    }
+
+    header .logo {
+      background-color: transparent;
+      height: 50px;
+      vertical-align: middle;
+    }
+
+    header .header-title {
+      display: inline-block;
+      margin-left: 20px;
+      font-size: 24px;
+      vertical-align: middle;
+    }
+
+    main {
+      flex-grow: 1;
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .title {
+      font-size: 28px;
+      margin-bottom: 30px;
+      color: var(--primary-color);
+      text-align: center;
+    }
+
+    .statistics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .statistics-section {
+      background-color: var(--white);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      height: 500px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: var(--text-color);
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .btn.primary {
+      background-color: var(--primary-color);
+      color: var(--white);
+    }
+
+    .btn.primary:hover,
+    .btn.primary:focus {
+      background-color: #001e4a;
+    }
+
+    footer {
+      background-color: var(--primary-color);
+      padding: 20px;
+      text-align: center;
+      color: var(--white);
+      margin-top: 40px;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .footer-link {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .chart-container {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+    }
+
+    .large-chart {
+      display: block;
+      margin: 0 auto;
+      width: 350px !important;
+      height: 350px !important;
+    }
+
+    .medium-chart {
+      display: block;
+      margin: 0 auto;
+      width: 250px !important;
+      height: 250px !important;
+    }
+
+    .small-chart {
+      display: block;
+      margin: 0 auto;
+      width: 120px !important;
+      height: 120px !important;
+    }
+
+    .bar-chart {
+      width: 100% !important;
+      height: 400px !important;
+    }
+
+    .campus-title {
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .publish-options {
+      background-color: var(--white);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      margin-top: 30px;
+      text-align: left;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Header Section -->
+  <header>
+    <div class="logo-container">
+      <a href="/" title="Monash University Home">
+        <img src="logo.png" alt="Monash University Logo" class="logo" />
+      </a>
+      <span class="header-title">Election Statistics - Monash University Voting</span>
+    </div>
+  </header>
+
+  <!-- Main Content Section -->
+  <main>
+    <h2 class="title">
+      Monash Debate Club - Secretary<br>
+      Election Statistics Overview
+    </h2>
+
+    <!-- Statistics Grid -->
+    <div class="statistics-grid">
+      <!-- Voter Turnout Section -->
+      <div class="statistics-section">
+        <h3 class="section-title">Voter Turnout</h3>
+        <canvas id="voterTurnoutChart" class="medium-chart"></canvas>
+        <div class="chart-container">
+          <div>
+            <canvas id="campusTurnoutChart1" class="small-chart"></canvas>
+            <div class="campus-title">Clayton Campus</div>
+          </div>
+          <div>
+            <canvas id="campusTurnoutChart2" class="small-chart"></canvas>
+            <div class="campus-title">Caulfield Campus</div>
+          </div>
+          <div>
+            <canvas id="campusTurnoutChart3" class="small-chart"></canvas>
+            <div class="campus-title">Peninsula Campus</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Votes per Candidate Section -->
+      <div class="statistics-section">
+        <h3 class="section-title">Votes per Candidate</h3>
+        <canvas id="votesPerCandidateChart" class="bar-chart"></canvas>
+      </div>
+
+      <!-- Faculty Votes Section -->
+      <div class="statistics-section">
+        <h3 class="section-title">Votes by Faculty</h3>
+        <canvas id="facultyVotesChart" class="bar-chart"></canvas>
+      </div>
+
+      <!-- Gender Breakdown Section -->
+      <div class="statistics-section">
+        <h3 class="section-title">Gender Breakdown</h3>
+        <canvas id="genderChart" class="large-chart"></canvas>
+      </div>
+
+      <!-- Voter Composition Breakdown Section -->
+      <div class="statistics-section">
+        <h3 class="section-title">Voter Composition Breakdown</h3>
+        <canvas id="categoryChart" class="large-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Publish Options Section -->
+    <div class="publish-options">
+      <h3>Publish Selected Statistics</h3>
+      <form>
+        <div>
+          <label for="publishVoterTurnout">
+            <input type="checkbox" id="publishVoterTurnout" name="publishVoterTurnout" value="yes">
+            Publish Voter Turnout Statistics
+          </label>
+        </div>
+        <div>
+          <label for="publishVotesPerCandidate">
+            <input type="checkbox" id="publishVotesPerCandidate" name="publishVotesPerCandidate" value="yes">
+            Publish Votes per Candidate
+          </label>
+        </div>
+        <div>
+          <label for="publishFacultyVotes">
+            <input type="checkbox" id="publishFacultyVotes" name="publishFacultyVotes" value="yes">
+            Publish Votes by Faculty
+          </label>
+        </div>
+        <div>
+          <label for="publishGenderBreakdown">
+            <input type="checkbox" id="publishGenderBreakdown" name="publishGenderBreakdown" value="yes">
+            Publish Gender Breakdown
+          </label>
+        </div>
+        <div>
+          <label for="publishCategoryBreakdown">
+            <input type="checkbox" id="publishCategoryBreakdown" name="publishCategoryBreakdown" value="yes">
+            Publish Voter Composition Breakdown
+          </label>
+        </div>
+        <button class="btn primary" type="button" onclick="applySelection()">Apply Selection</button>
+      </form>
+    </div>
+
+    <!-- Back Button -->
+    <button class="btn primary" onclick="window.history.back();">Back to Dashboard</button>
+  </main>
+
+  <!-- Footer Section -->
+  <footer>
+    <div class="footer-links">
+      <a href="/help" class="footer-link">Help</a>
+      <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
+    </div>
+  </footer>
+
+  <script>
+    // Gender Breakdown Pie Chart
+    const genderCtx = document.getElementById('genderChart').getContext('2d');
+    const genderChart = new Chart(genderCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Male', 'Female', 'Other'],
+        datasets: [{
+          label: 'Gender Breakdown',
+          data: [55, 40, 5],
+          backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56'],
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
+
+    // Votes per Candidate Bar Chart
+    const votesCtx = document.getElementById('votesPerCandidateChart').getContext('2d');
+    const votesPerCandidateChart = new Chart(votesCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Candidate 1', 'Candidate 2', 'Candidate 3'],
+        datasets: [{
+          label: 'Votes per Candidate',
+          data: [120, 95, 80],
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    // Voter Turnout Pie Chart
+    const turnoutCtx = document.getElementById('voterTurnoutChart').getContext('2d');
+    const voterTurnoutChart = new Chart(turnoutCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Voted', 'Did Not Vote'],
+        datasets: [{
+          label: 'Voter Turnout',
+          data: [75, 25],
+          backgroundColor: ['#36A2EB', '#FFCE56'],
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+
+    // Voter Turnout by Campus Pie Charts
+    const campusTurnout1Ctx = document.getElementById('campusTurnoutChart1').getContext('2d');
+    new Chart(campusTurnout1Ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Voted', 'Did Not Vote'],
+        datasets: [{
+          data: [60, 40],
+          backgroundColor: ['#36A2EB', '#FFCE56'],
+          hoverOffset: 4
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    const campusTurnout2Ctx = document.getElementById('campusTurnoutChart2').getContext('2d');
+    new Chart(campusTurnout2Ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Voted', 'Did Not Vote'],
+        datasets: [{
+          data: [80, 20],
+          backgroundColor: ['#36A2EB', '#FFCE56'],
+          hoverOffset: 4
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    const campusTurnout3Ctx = document.getElementById('campusTurnoutChart3').getContext('2d');
+    new Chart(campusTurnout3Ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Voted', 'Did Not Vote'],
+        datasets: [{
+          data: [70, 30],
+          backgroundColor: ['#36A2EB', '#FFCE56'],
+          hoverOffset: 4
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    // Votes by Faculty Bar Chart
+    const facultyCtx = document.getElementById('facultyVotesChart').getContext('2d');
+    const facultyVotesChart = new Chart(facultyCtx, {
+      type: 'bar',
+      data: {
+        labels: [
+          'Faculty of Arts',
+          'Faculty of Business',
+          'Faculty of Education',
+          'Faculty of Engineering',
+          'Faculty of Information Technology',
+          'Faculty of Law',
+          'Faculty of Science',
+          'Faculty of Medicine'
+        ],
+        datasets: [{
+          label: 'Votes by Faculty',
+          data: [120, 180, 150, 200, 100, 90, 140, 130],
+          backgroundColor: [
+            '#FF6384',
+            '#36A2EB',
+            '#FFCE56',
+            '#4BC0C0',
+            '#9966FF',
+            '#FF9F40',
+            '#FFCD56',
+            '#4BC0C0'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+
+    // Voter Composition Breakdown Pie Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryChart = new Chart(categoryCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Postgrad', 'Undergrad', 'Staff', 'Alumni'],
+        datasets: [{
+          label: 'Voter Category Breakdown',
+          data: [30, 50, 10, 10],
+          backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0'],
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+
+    // Apply selection logic for publish options
+    function applySelection() {
+      const voterTurnout = document.getElementById('publishVoterTurnout').checked;
+      const votesPerCandidate = document.getElementById('publishVotesPerCandidate').checked;
+      const facultyVotes = document.getElementById('publishFacultyVotes').checked;
+      const genderBreakdown = document.getElementById('publishGenderBreakdown').checked;
+      const categoryBreakdown = document.getElementById('publishCategoryBreakdown').checked;
+
+      console.log("Selections applied:");
+      console.log("Voter Turnout Published:", voterTurnout);
+      console.log("Votes per Candidate Published:", votesPerCandidate);
+      console.log("Faculty Votes Published:", facultyVotes);
+      console.log("Gender Breakdown Published:", genderBreakdown);
+      console.log("Category Breakdown Published:", categoryBreakdown);
+
+      // Typically, you would send this data to the server to save the changes
+    }
+  </script>
+</body>
+</html>

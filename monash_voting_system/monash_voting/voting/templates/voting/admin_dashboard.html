@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Monash University Voting</title>
+  <style>
+    :root {
+      --primary-color: #002f6c;
+      --secondary-color: #0077b6;
+      --background-color: #f4f7fa;
+      --white: #fff;
+      --text-color: #555;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    /* Header */
+    header {
+      background-color: var(--primary-color);
+      padding: 20px;
+      text-align: left;
+      color: var(--white);
+    }
+    .logo {
+      background-color: transparent;
+      height: 50px;
+      vertical-align: middle;
+    }
+    .header-title {
+      display: inline-block;
+      margin-left: 20px;
+      font-size: 24px;
+      vertical-align: middle;
+    }
+    /* Main Container */
+    main {
+      flex-grow: 1;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .title {
+      font-size: 28px;
+      margin-bottom: 30px;
+      color: var(--primary-color);
+      text-align: center;
+    }
+    .dashboard-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      max-width: 1200px;
+    }
+    .dashboard-section {
+      background-color: var(--white);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      flex: 1 1 100%;
+      max-width: 100%;
+    }
+    .section-title {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: var(--text-color);
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    .btn.primary {
+      background-color: var(--primary-color);
+      color: var(--white);
+    }
+    .btn.primary:hover,
+    .btn.primary:focus {
+      background-color: #001e4a;
+    }
+    .btn.grey {
+      background-color: grey;
+      color: var(--white);
+      cursor: not-allowed;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table th, table td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ccc;
+    }
+    table th {
+      background-color: #f0f0f0;
+    }
+    /* Footer */
+    footer {
+      background-color: var(--primary-color);
+      padding: 20px;
+      text-align: center;
+      color: var(--white);
+      margin-top: 40px;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .footer-link {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    /* Shared Modal Styles */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      z-index: 200;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: var(--white);
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: var(--shadow);
+    }
+    .modal-header {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+    .modal-body {
+      margin-bottom: 10px;
+    }
+    .modal-footer {
+      text-align: right;
+    }
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    /* Candidate field styling */
+    .candidate-field {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .candidate-field input {
+      flex: 1;
+      margin-right: 10px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .removeCandidateBtn {
+      background-color: var(--secondary-color);
+      color: var(--white);
+      border: none;
+      border-radius: 3px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .removeCandidateBtn:hover {
+      background-color: #005089;
+    }
+    /* Styles for results table in the view results modal */
+    #resultsTable {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    #resultsTable th, #resultsTable td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    #resultsTable th {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Section -->
+  <header>
+    <div class="logo-container">
+      <a href="/" title="Monash University Home">
+        <img src="logo.png" alt="Monash University Logo" class="logo">
+      </a>
+      <span class="header-title">Admin Dashboard - Monash University Voting</span>
+    </div>
+  </header>
+  
+  <!-- Main Content Section -->
+  <main>
+    <h2 class="title">Manage Elections</h2>
+    <div class="dashboard-grid">
+      <div class="dashboard-section">
+        <h3 class="section-title">Election Management</h3>
+        <p>View, edit, or create new elections</p>
+        <!-- Create New Election Button -->
+        <button class="btn primary" id="openCreateElection">Create New Election</button>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40%;">Election Name</th>
+              <th style="width: 20%;">Status</th>
+              <th style="width: 20%;">Actions</th>
+              <th style="width: 20%;">Statistics</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Sample row with an Edit button (data attributes for editing) -->
+            <tr>
+              <td>Monash Debate Club - Secretary</td>
+              <td>Pending</td>
+              <td>
+                <button class="btn primary editElectionBtn" 
+                  data-election-id="1"
+                  data-name="Monash Debate Club - Secretary"
+                  data-description="Election for selecting the secretary."
+                  data-candidates='["Alice","Bob"]'
+                  data-start-date="2024-09-01"
+                  data-end-date="2024-09-15">
+                  Edit
+                </button>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Monash Chess Club - President</td>
+              <td>Ongoing</td>
+              <td>
+                <button class="btn grey">Edit</button>
+              </td>
+              <td>
+                <button class="btn primary" onclick="window.location.href='vote_stats.html';">
+                  View Statistics
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Monash Robotics Club - Vice President</td>
+              <td>Completed</td>
+              <td>
+                <!-- Updated View Results button with sample data attributes -->
+                <button class="btn primary viewResultsBtn"
+                  data-election-id="3"
+                  data-name="Monash Robotics Club - Vice President"
+                  data-results='{"Candidate 1": 150, "Candidate 2": 120, "Candidate 3": 90}'>
+                  View Results
+                </button>
+              </td>
+              <td>
+                <button class="btn primary" onclick="window.location.href='vote_stats.html';">
+                  View Statistics
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="dashboard-section">
+        <h3 class="section-title">Audit Trail</h3>
+        <p>View the log of voting activities to ensure integrity</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Action</th>
+              <th>User</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2024-09-01</td>
+              <td>Vote Cast</td>
+              <td>33****80</td>
+              <td>
+                <button class="btn primary" onclick="window.location.href='trail_detail.html';">
+                  View Details
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>2024-09-02</td>
+              <td>Vote Cast</td>
+              <td>33****73</td>
+              <td>
+                <button class="btn primary" onclick="window.location.href='trail_detail.html';">
+                  View Details
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>2024-08-31</td>
+              <td>New Voting Created</td>
+              <td>32****64</td>
+              <td>
+                <button class="btn primary" onclick="window.location.href='trail_detail.html';">
+                  View Details
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="dashboard-section">
+        <h3 class="section-title">Security &amp; User Management</h3>
+        <p>Manage voters and security settings</p>
+        <button class="btn primary">Add/Remove Users</button>
+        <p>Multi-factor authentication: <strong>Enabled</strong></p>
+        <p>Data encryption status: <strong>Secure</strong></p>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Footer Section -->
+  <footer>
+    <div class="footer-links">
+      <a href="/help" class="footer-link">Help</a>
+      <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
+    </div>
+  </footer>
+  
+  <!-- Modal for Creating New Election -->
+  <div id="createElectionModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Create New Election</div>
+      <div class="modal-body">
+        <form id="createElectionForm">
+          <div class="form-group">
+            <label for="electionName">Election Name:</label>
+            <input type="text" id="electionName" name="electionName" required>
+          </div>
+          <div class="form-group">
+            <label for="electionDescription">Election Description:</label>
+            <textarea id="electionDescription" name="electionDescription" rows="3" required></textarea>
+          </div>
+          <div class="form-group" id="candidatesContainer">
+            <label>Candidate Names:</label>
+            <div class="candidate-field">
+              <input type="text" name="candidateNames[]" class="candidate-input" placeholder="Candidate Name" required>
+            </div>
+          </div>
+          <button type="button" id="addCandidateBtn" class="btn primary" style="margin-bottom: 15px;">Add Candidate</button>
+          <div class="form-group">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" name="startDate" required>
+          </div>
+          <div class="form-group">
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" name="endDate" required>
+          </div>
+          <button type="submit" class="btn primary">Create Election</button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="closeCreateModal" class="btn secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal for Editing Election -->
+  <div id="editElectionModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Edit Election</div>
+      <div class="modal-body">
+        <form id="editElectionForm">
+          <!-- Hidden field for election ID -->
+          <input type="hidden" id="editElectionId" name="electionId">
+          <div class="form-group">
+            <label for="editElectionName">Election Name:</label>
+            <input type="text" id="editElectionName" name="electionName" required>
+          </div>
+          <div class="form-group">
+            <label for="editElectionDescription">Election Description:</label>
+            <textarea id="editElectionDescription" name="electionDescription" rows="3" required></textarea>
+          </div>
+          <div class="form-group" id="editCandidatesContainer">
+            <label>Candidate Names:</label>
+            <!-- Candidate fields will be populated dynamically -->
+          </div>
+          <button type="button" id="editAddCandidateBtn" class="btn primary" style="margin-bottom: 15px;">Add Candidate</button>
+          <div class="form-group">
+            <label for="editStartDate">Start Date:</label>
+            <input type="date" id="editStartDate" name="startDate" required>
+          </div>
+          <div class="form-group">
+            <label for="editEndDate">End Date:</label>
+            <input type="date" id="editEndDate" name="endDate" required>
+          </div>
+          <button type="submit" class="btn primary">Save Changes</button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="closeEditModal" class="btn secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal for Viewing Results -->
+  <div id="viewResultsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Election Results</div>
+      <div class="modal-body">
+        <p id="resultsElectionName"></p>
+        <table id="resultsTable">
+          <thead>
+            <tr>
+              <th>Candidate</th>
+              <th>Votes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Results rows populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button id="closeResultsModal" class="btn secondary">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- JavaScript for Modal Behavior and Candidate Logic -->
+  <script>
+    /* ---------- Functions for Candidate Fields ---------- */
+    // Creates a candidate field for a given container selector (used for both create and edit modals)
+    function createCandidateField(containerSelector) {
+      const candidateDiv = document.createElement('div');
+      candidateDiv.classList.add('candidate-field');
+      
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = 'candidateNames[]';
+      input.placeholder = 'Candidate Name';
+      input.required = true;
+      
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.classList.add('removeCandidateBtn');
+      removeBtn.textContent = 'Remove';
+      removeBtn.addEventListener('click', function() {
+        const container = document.querySelector(containerSelector);
+        const candidateFields = container.querySelectorAll('.candidate-field');
+        if (candidateFields.length > 1) {
+          candidateDiv.remove();
+        } else {
+          alert("At least one candidate is required.");
+        }
+      });
+      
+      candidateDiv.appendChild(input);
+      candidateDiv.appendChild(removeBtn);
+      return candidateDiv;
+    }
+    
+    // Resets candidate fields in a given container to a single field
+    function resetCandidateFields(containerSelector) {
+      const container = document.querySelector(containerSelector);
+      container.innerHTML = '<label>Candidate Names:</label>';
+      container.appendChild(createCandidateField(containerSelector));
+    }
+    
+    /* ---------- Create Election Modal Logic ---------- */
+    document.getElementById('openCreateElection').addEventListener('click', function() {
+      document.getElementById('createElectionModal').style.display = 'block';
+      resetCandidateFields('#candidatesContainer');
+    });
+    
+    function closeCreateModal() {
+      document.getElementById('createElectionModal').style.display = 'none';
+      document.getElementById('createElectionForm').reset();
+      resetCandidateFields('#candidatesContainer');
+    }
+    
+    document.getElementById('closeCreateModal').addEventListener('click', closeCreateModal);
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('createElectionModal');
+      if (event.target === modal) {
+        closeCreateModal();
+      }
+    });
+    
+    document.getElementById('addCandidateBtn').addEventListener('click', function() {
+      const container = document.getElementById('candidatesContainer');
+      container.appendChild(createCandidateField('#candidatesContainer'));
+    });
+    
+    document.getElementById('createElectionForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      const electionData = {
+        name: document.getElementById('electionName').value,
+        description: document.getElementById('electionDescription').value,
+        candidates: Array.from(document.getElementsByClassName('candidate-input')).map(input => input.value),
+        startDate: document.getElementById('startDate').value,
+        endDate: document.getElementById('endDate').value
+      };
+      
+      // TODO: Replace simulation with AJAX call to Django backend.
+      console.log("New election created:", electionData);
+      alert("Election created successfully!");
+      
+      closeCreateModal();
+    });
+    
+    /* ---------- Edit Election Modal Logic ---------- */
+    document.querySelectorAll('.editElectionBtn').forEach(function(button) {
+      button.addEventListener('click', function() {
+        const electionId = this.getAttribute('data-election-id');
+        const name = this.getAttribute('data-name');
+        const description = this.getAttribute('data-description');
+        const candidates = JSON.parse(this.getAttribute('data-candidates'));
+        const startDate = this.getAttribute('data-start-date');
+        const endDate = this.getAttribute('data-end-date');
+        
+        document.getElementById('editElectionId').value = electionId;
+        document.getElementById('editElectionName').value = name;
+        document.getElementById('editElectionDescription').value = description;
+        document.getElementById('editStartDate').value = startDate;
+        document.getElementById('editEndDate').value = endDate;
+        
+        const editCandidatesContainer = document.getElementById('editCandidatesContainer');
+        editCandidatesContainer.innerHTML = '<label>Candidate Names:</label>';
+        if (candidates.length > 0) {
+          candidates.forEach(function(candidate) {
+            const field = createCandidateField('#editCandidatesContainer');
+            field.querySelector('input').value = candidate;
+            editCandidatesContainer.appendChild(field);
+          });
+        } else {
+          editCandidatesContainer.appendChild(createCandidateField('#editCandidatesContainer'));
+        }
+        
+        document.getElementById('editElectionModal').style.display = 'block';
+      });
+    });
+    
+    function closeEditModal() {
+      document.getElementById('editElectionModal').style.display = 'none';
+      document.getElementById('editElectionForm').reset();
+      resetCandidateFields('#editCandidatesContainer');
+    }
+    
+    document.getElementById('closeEditModal').addEventListener('click', closeEditModal);
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('editElectionModal');
+      if (event.target === modal) {
+        closeEditModal();
+      }
+    });
+    
+    document.getElementById('editAddCandidateBtn').addEventListener('click', function() {
+      const container = document.getElementById('editCandidatesContainer');
+      container.appendChild(createCandidateField('#editCandidatesContainer'));
+    });
+    
+    document.getElementById('editElectionForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      const electionData = {
+        id: document.getElementById('editElectionId').value,
+        name: document.getElementById('editElectionName').value,
+        description: document.getElementById('editElectionDescription').value,
+        candidates: Array.from(document.querySelectorAll('#editCandidatesContainer .candidate-input')).map(input => input.value),
+        startDate: document.getElementById('editStartDate').value,
+        endDate: document.getElementById('editEndDate').value
+      };
+      
+      // TODO: Replace simulation with AJAX call to Django backend.
+      console.log("Election updated:", electionData);
+      alert("Election updated successfully!");
+      
+      closeEditModal();
+    });
+    
+    /* ---------- View Results Modal Logic ---------- */
+    // When a "View Results" button is clicked, populate and open the view results modal.
+    document.querySelectorAll('.viewResultsBtn').forEach(function(button) {
+      button.addEventListener('click', function() {
+        const electionId = this.getAttribute('data-election-id'); // For potential use.
+        const electionName = this.getAttribute('data-name');
+        const resultsJSON = this.getAttribute('data-results');
+        const results = JSON.parse(resultsJSON);
+        
+        document.getElementById('resultsElectionName').textContent = "Results for: " + electionName;
+        const resultsTableBody = document.querySelector('#resultsTable tbody');
+        resultsTableBody.innerHTML = ""; // Clear any previous results
+        
+        for (let candidate in results) {
+          const row = document.createElement('tr');
+          const candidateCell = document.createElement('td');
+          candidateCell.textContent = candidate;
+          const votesCell = document.createElement('td');
+          votesCell.textContent = results[candidate];
+          row.appendChild(candidateCell);
+          row.appendChild(votesCell);
+          resultsTableBody.appendChild(row);
+        }
+        
+        document.getElementById('viewResultsModal').style.display = 'block';
+      });
+    });
+    
+    // Close view results modal
+    document.getElementById('closeResultsModal').addEventListener('click', function() {
+      document.getElementById('viewResultsModal').style.display = 'none';
+    });
+    
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('viewResultsModal');
+      if (event.target === modal) {
+        document.getElementById('viewResultsModal').style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

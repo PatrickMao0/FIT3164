@@ -1,0 +1,328 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monash University Clubs Voting - Cast Your Vote</title>
+  <style>
+    :root {
+      --primary-color: #002f6c;
+      --secondary-color: #0077b6;
+      --background-color: #f4f7fa;
+      --white: #fff;
+      --text-color: #555;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    /* Header */
+    header {
+      background-color: var(--primary-color);
+      padding: 20px;
+      text-align: left;
+    }
+    .logo {
+      background-color: transparent;
+      height: 50px;
+    }
+    /* Main Container */
+    main {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .voting-container {
+      background-color: var(--white);
+      padding: 40px;
+      box-shadow: var(--shadow);
+      border-radius: 10px;
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+      margin: auto;
+    }
+    .title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+    .description {
+      margin-bottom: 20px;
+      font-size: 16px;
+      color: var(--text-color);
+    }
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    fieldset {
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+    legend {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+    label {
+      display: inline-block;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    input[type="radio"] {
+      margin-right: 5px;
+      cursor: pointer;
+    }
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .btn.primary {
+      background-color: var(--primary-color);
+      color: var(--white);
+    }
+    .btn.primary:hover,
+    .btn.primary:focus {
+      background-color: #001e4a;
+    }
+    .btn.secondary {
+      background-color: var(--secondary-color);
+      color: var(--white);
+      margin-top: 10px;
+    }
+    .btn.secondary:hover,
+    .btn.secondary:focus {
+      background-color: #005089;
+    }
+    .confirmation {
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--text-color);
+    }
+    /* Footer */
+    footer {
+      background-color: var(--primary-color);
+      padding: 20px;
+      text-align: center;
+      color: var(--white);
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .footer-link {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    /* Modal Styles (hidden by default) */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: var(--white);
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      max-width: 500px;
+      text-align: left;
+    }
+    .modal-header {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+    .modal-body p {
+      margin: 5px 0;
+      color: var(--text-color);
+    }
+    .modal-footer {
+      text-align: right;
+      margin-top: 20px;
+    }
+    .exit-btn {
+      padding: 8px 16px;
+      background-color: var(--primary-color);
+      color: var(--white);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .exit-btn:hover,
+    .exit-btn:focus {
+      background-color: #001e4a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Section -->
+  <header>
+    <div class="logo-container">
+      <a href="/" title="Monash University Home">
+        <img src="{% static 'images/logo.png' %}" alt="Monash University Logo" class="logo">
+      </a>
+    </div>
+  </header>
+  
+  <!-- Main Content Section -->
+  <main>
+    <section class="voting-container">
+      <h1 class="title">Election: {{ election.name }}</h1>
+      <p class="description">
+        Club: {{ election.club.name }}<br>
+        Election Period: {{ election.start_date|date:"Y-m-d H:i:s" }} to {{ election.end_date|date:"Y-m-d H:i:s" }}<br>
+        {% if election.description %}{{ election.description }}{% endif %}
+      </p>
+      <form id="votingForm" action="{% url 'voting' election.id %}" method="POST" class="voting-form">
+        {% csrf_token %}
+        <div class="form-group">
+          <fieldset>
+            <legend>Select Your Candidate:</legend>
+            {% for candidate in election.candidates.all %}
+              <div>
+                <input type="radio" id="candidate{{ candidate.id }}" name="candidate" value="{{ candidate.id }}" required>
+                <label for="candidate{{ candidate.id }}">
+                  {{ candidate.user.get_full_name|default:candidate.user.username }}
+                </label>
+              </div>
+            {% empty %}
+              <p>No candidates available for this election.</p>
+            {% endfor %}
+          </fieldset>
+        </div>
+        <div class="confirmation">
+          Please review your selection carefully before submitting your vote.
+        </div>
+        <button type="submit" class="btn primary">Submit Vote</button>
+        <button type="reset" class="btn secondary">Clear Selection</button>
+      </form>
+    </section>
+  </main>
+  
+  <!-- Modal Notification Window -->
+  <div id="confirmationModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Vote Confirmation</div>
+      <div class="modal-body">
+        <p><strong>Date:</strong> <span id="confirmDate"></span></p>
+        <p><strong>Time:</strong> <span id="confirmTime"></span></p>
+        <p><strong>User:</strong> <span id="confirmUserID">{{ user.username }}</span></p>
+        <p><strong>Election:</strong> <span id="confirmElection">{{ election.name }}</span></p>
+        <p><strong>Voted For:</strong> <span id="confirmCandidate"></span></p>
+        <p><strong>Vote Confirmation ID:</strong> <span id="confirmVoteID"></span></p>
+        <p><strong>Outcome:</strong> <span id="confirmOutcome">Success</span></p>
+      </div>
+      <div class="modal-footer">
+        <button id="exitBtn" class="exit-btn">Back to Clubs</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer Section -->
+  <footer>
+    <div class="footer-links">
+      <a href="/help" class="footer-link">Help</a>
+      <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
+    </div>
+  </footer>
+  
+  <script>
+    // Intercept form submission, send vote via AJAX, and display the notification modal.
+    document.getElementById('votingForm').addEventListener('submit', function(event) {
+      event.preventDefault();  // Prevent the default form submission
+      
+      const form = this;
+      const formData = new FormData(form);
+      
+      // Send AJAX POST request using fetch
+      fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        },
+        credentials: 'include'
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok.');
+        }
+        // For demo purposes, assume a successful JSON response.
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          // Gather vote details
+          const now = new Date();
+          const dateStr = now.toLocaleDateString();
+          const timeStr = now.toLocaleTimeString();
+          
+          const candidateInput = document.querySelector('input[name="candidate"]:checked');
+          if (!candidateInput) {
+            alert("Please select a candidate.");
+            return;
+          }
+          const candidateLabel = candidateInput.nextElementSibling.innerText;
+          const voteID = 'VC-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+          
+          // Populate the modal with vote details
+          document.getElementById('confirmDate').innerText = dateStr;
+          document.getElementById('confirmTime').innerText = timeStr;
+          document.getElementById('confirmCandidate').innerText = candidateLabel;
+          document.getElementById('confirmVoteID').innerText = voteID;
+          
+          // Display the modal notification
+          document.getElementById('confirmationModal').style.display = 'block';
+        } else {
+          alert("Error: " + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('There was an error submitting your vote.');
+      });
+    });
+    
+    // When the user clicks "Back to Clubs", redirect to the club selection page.
+    document.getElementById('exitBtn').addEventListener('click', function() {
+      window.location.href = "{% url 'club_selection' %}";
+    });
+    
+    // Optional: If user clicks outside modal content, close modal and reset form.
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('confirmationModal');
+      if (event.target === modal) {
+        modal.style.display = 'none';
+        document.getElementById('votingForm').reset();
+      }
+    });
+  </script>
+</body>
+</html>
