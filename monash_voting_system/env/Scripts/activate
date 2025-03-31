@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\patri\monash_voting_system\env"
+VIRTUAL_ENV="C:\Users\patri\Desktop\monash_voting\env"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

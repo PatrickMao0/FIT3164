@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\patri\monash_voting_system\env
+set VIRTUAL_ENV=C:\Users\patri\Desktop\monash_voting\env
 
 if not defined PROMPT set PROMPT=$P$G
 
