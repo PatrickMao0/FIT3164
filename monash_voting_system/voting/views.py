@@ -2,10 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Election, Membership, Candidate, Vote
+from .models import Election, Membership, Candidate, Vote, Club
 import json
 from django.http import JsonResponse
-
+from datetime import datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
@@ -79,11 +79,6 @@ def is_club_admin(user):
     return user.groups.filter(name='club_admin').exists()
 
 @login_required
-@user_passes_test(is_club_admin)
-def admin_dashboard_view(request):
-    return render(request, 'voting/admin_dashboard.html')
-
-@login_required
 def voting_view(request, election_id):
     election = get_object_or_404(Election, id=election_id)
 
@@ -108,6 +103,122 @@ def voting_view(request, election_id):
         return JsonResponse({"success": True})
 
     return render(request, "voting/voting_page.html", {"election": election})
+
+@login_required
+@user_passes_test(is_club_admin)
+def admin_dashboard_view(request):
+    clubs = Club.objects.all()
+    
+    # Build a mapping from club id to list of candidate details (using the new Candidate model)
+    club_candidates = {}
+    for club in clubs:
+        candidates = Candidate.objects.filter(club=club)
+        club_candidates[club.id] = [
+            {
+                'id': candidate.id,
+                'username': candidate.user.username,
+                'full_name': candidate.user.get_full_name() or candidate.user.username,
+            }
+            for candidate in candidates
+        ]
+    
+    context = {
+        'clubs': clubs,
+        'club_candidates_json': json.dumps(club_candidates),
+    }
+    return render(request, 'voting/admin_dashboard.html', context)
+
+
+@login_required
+@user_passes_test(is_club_admin)
+def update_election(request, election_id):
+    election = get_object_or_404(Election, pk=election_id)
+    if request.method == 'POST':
+        # Extract data from the POST request.
+        election.name = request.POST.get('electionName')
+        election.description = request.POST.get('electionDescription')
+        election.start_date = request.POST.get('startDate')
+        election.end_date = request.POST.get('endDate')
+        
+        # Update club if needed.
+        club_id = request.POST.get('clubName')
+        if club_id:
+            election.club = get_object_or_404(Club, pk=club_id)
+        
+        # Update the many-to-many candidates.
+        # Remove existing candidates.
+        election.candidates.clear()
+        # Retrieve the candidate usernames from the select fields.
+        candidate_usernames = request.POST.getlist('candidateNames[]')
+        for username in candidate_usernames:
+            try:
+                # Look up the Candidate based on username and club.
+                candidate = Candidate.objects.get(user__username=username, club=election.club)
+                election.candidates.add(candidate)
+            except Candidate.DoesNotExist:
+                messages.error(request, f"Candidate '{username}' not found in the selected club.")
+        
+        # Save the election
+        election.save()
+        messages.success(request, "Election updated successfully!")
+        return redirect('admin_dashboard')  # Adjust as needed
+    else:
+        # For GET requests, you can pre-populate a form or redirect.
+        return render(request, 'voting/edit_election.html', {'election': election})
+
+
+@login_required
+@user_passes_test(is_club_admin)
+def create_election(request):
+    if request.method == 'POST':
+        club_id = request.POST.get('clubName')
+        name = request.POST.get('electionName')
+        description = request.POST.get('electionDescription')
+        start_date_str = request.POST.get('startDate')
+        end_date_str = request.POST.get('endDate')
+        candidate_usernames = request.POST.getlist('candidateNames[]')
+        
+        # Validate that the dates are provided
+        if not start_date_str or not end_date_str:
+            messages.error(request, "Both start and end dates are required.")
+            return redirect('admin_dashboard')
+        
+        # Convert from "DD-MM-YYYY" to a date object
+        try:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
+            return redirect('admin_dashboard')
+                
+        club = get_object_or_404(Club, pk=club_id)
+        
+        # Create the election object
+        election = Election.objects.create(
+            club=club,
+            name=name,
+            description=description,
+            start_date=start_date,
+            end_date=end_date,
+            status=Election.STATUS_PENDING,
+            created_by=request.user
+        )
+        
+        # Associate candidates to the election
+        for username in candidate_usernames:
+            try:
+                candidate = Candidate.objects.get(user__username=username, club=club)
+                election.candidates.add(candidate)
+            except Candidate.DoesNotExist:
+                messages.error(request, f"Candidate '{username}' not found for club {club.name}.")
+        
+        election.save()
+        messages.success(request, "Election created successfully!")
+        return redirect('admin_dashboard')
+    else:
+        messages.error(request, "Invalid request.")
+        return redirect('admin_dashboard')
+
 
 def vote_stats_view(request):
     return render(request, 'voting/vote_stats.html')

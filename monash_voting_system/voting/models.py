@@ -35,14 +35,19 @@ class Election(models.Model):
         (STATUS_ENDED, 'Ended'),
     ]
     
-    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name='elections')
+    club = models.ForeignKey('Club', on_delete=models.CASCADE, related_name='elections')
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    start_date = models.DateField()
+    end_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_elections')
+    # New field: candidates contesting in this election.
+    candidates = models.ManyToManyField('Candidate', related_name='elections', blank=True)
+
     
+    def __str__(self):
+        return self.name
     def __str__(self):
         return self.name
 
@@ -72,7 +77,7 @@ class Election(models.Model):
 
 # Candidate represents a candidate running in an election.
 class Candidate(models.Model):
-    election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='candidates')
+    club = models.ForeignKey('Club', on_delete=models.CASCADE, related_name='candidates')
     # Every candidate must be a registered user.
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='candidate_entries')
     bio = models.TextField(blank=True)
