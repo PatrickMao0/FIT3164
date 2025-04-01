@@ -6,6 +6,10 @@ from .models import Election, Membership, Candidate, Vote
 import json
 from django.http import JsonResponse
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+
 def login_view(request):
     if request.method == "POST":
         # Retrieve username, password, and login type from the form
@@ -16,19 +20,17 @@ def login_view(request):
         # Authenticate the user
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            # Log the user in to create a session
-            login(request, user)
-            
-            # Redirect based on the login type
+            login(request, user)  # Log the user in (creates session)
             if login_type == "admin":
                 # Check if the user is in the "club_admin" group
                 if user.groups.filter(name="club_admin").exists():
                     return redirect("admin_dashboard")
                 else:
-                    messages.error(request, "You are not authorized to log in as admin.")
-                    return redirect("club_selection")
+                    messages.error(request, "You are not authorized to log in as admin. Please contact support if you believe this is an error.")
+                    # Re-render the login page with the error message
+                    return render(request, "voting/login_page.html")
             else:
-                # Normal login: redirect to the club selection page
+                # Normal login: redirect to club selection page
                 return redirect("club_selection")
         else:
             messages.error(request, "Invalid username or password.")

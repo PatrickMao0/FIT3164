@@ -64,6 +64,20 @@
       max-width: 1200px;
       margin: 0 auto;
     }
+    .messages {
+      margin-bottom: 20px;
+    }
+    .alert {
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .alert.error {
+      background-color: #f8d7da;
+      color: #842029;
+      border: 1px solid #f5c2c7;
+    }
     .btn {
       width: 100%;
       padding: 10px;
@@ -143,6 +157,18 @@
   <main>
     <section class="login-container">
       <h1>Monash University Clubs Voting System</h1>
+      
+      <!-- Display error messages if any -->
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="alert {{ message.tags }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      
       <form action="/login/" method="POST">
         {% csrf_token %}
         <div class="form-group">
@@ -153,7 +179,7 @@
           <label for="password">Password</label>
           <input type="password" id="password" name="password" required autocomplete="current-password">
         </div>
-        <!-- Instead of a hidden field and onclick, use separate buttons with a name attribute -->
+        <!-- Two separate submit buttons with different login types -->
         <button type="submit" name="login_type" value="normal" class="btn primary">Login</button>
         <button type="submit" name="login_type" value="admin" class="btn admin-btn">Login as Admin</button>
         <a href="/forgot-password" class="forgot-password-link">Forgot Password?</a>

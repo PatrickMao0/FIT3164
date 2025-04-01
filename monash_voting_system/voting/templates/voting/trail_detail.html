@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -131,7 +132,7 @@
   <header>
     <div class="logo-container">
       <a href="/" title="Monash University Home">
-        <img src="logo.png" alt="Monash University Logo" class="logo" />
+        <img src="{% static 'images/logo.png' %}" alt="Monash University Logo" class="logo">
       </a>
       <span class="header-title">Audit Trail Details</span>
     </div>
