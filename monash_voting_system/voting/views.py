@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Election, Membership, Candidate, Vote, Club
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from datetime import datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
@@ -91,7 +91,7 @@ def voting_view(request, election_id):
         candidate_id = request.POST.get("candidate")
         if not candidate_id:
             return JsonResponse({"success": False, "error": "No candidate selected."}, status=400)
-        candidate = get_object_or_404(Candidate, id=candidate_id, election=election)
+        candidate = get_object_or_404(Candidate, id=candidate_id, club=election.club)
 
         # Record the vote
         Vote.objects.create(
@@ -108,11 +108,22 @@ def voting_view(request, election_id):
 @user_passes_test(is_club_admin)
 def admin_dashboard_view(request):
     clubs = Club.objects.all()
+    elections = Election.objects.all().order_by('start_date')
     
-    # Build a mapping from club id to list of candidate details (using the new Candidate model)
+    # Attach candidate data to each election as a JSON string.
+    for election in elections:
+        election.candidate_data = json.dumps([
+            {
+                'username': candidate.user.username,
+                'full_name': candidate.user.get_full_name() or candidate.user.username,
+            }
+            for candidate in election.candidates.all()
+        ])
+    
+    # Build mapping for club candidates for use in candidate select dropdowns.
     club_candidates = {}
     for club in clubs:
-        candidates = Candidate.objects.filter(club=club)
+        candidates = list(Candidate.objects.filter(club=club))
         club_candidates[club.id] = [
             {
                 'id': candidate.id,
@@ -124,6 +135,7 @@ def admin_dashboard_view(request):
     
     context = {
         'clubs': clubs,
+        'elections': elections,
         'club_candidates_json': json.dumps(club_candidates),
     }
     return render(request, 'voting/admin_dashboard.html', context)
@@ -131,40 +143,32 @@ def admin_dashboard_view(request):
 
 @login_required
 @user_passes_test(is_club_admin)
-def update_election(request, election_id):
-    election = get_object_or_404(Election, pk=election_id)
+def update_election(request):
     if request.method == 'POST':
-        # Extract data from the POST request.
+        election_id = request.POST.get('electionId')
+        election = get_object_or_404(Election, pk=election_id)
         election.name = request.POST.get('electionName')
         election.description = request.POST.get('electionDescription')
         election.start_date = request.POST.get('startDate')
         election.end_date = request.POST.get('endDate')
         
-        # Update club if needed.
-        club_id = request.POST.get('clubName')
-        if club_id:
-            election.club = get_object_or_404(Club, pk=club_id)
         
-        # Update the many-to-many candidates.
-        # Remove existing candidates.
+        # Update candidates.
         election.candidates.clear()
-        # Retrieve the candidate usernames from the select fields.
         candidate_usernames = request.POST.getlist('candidateNames[]')
         for username in candidate_usernames:
             try:
-                # Look up the Candidate based on username and club.
                 candidate = Candidate.objects.get(user__username=username, club=election.club)
                 election.candidates.add(candidate)
             except Candidate.DoesNotExist:
-                messages.error(request, f"Candidate '{username}' not found in the selected club.")
+                messages.error(request, f"Candidate '{username}' not found for club {election.club.name}.")
         
-        # Save the election
         election.save()
         messages.success(request, "Election updated successfully!")
-        return redirect('admin_dashboard')  # Adjust as needed
+        return redirect('admin_dashboard')
     else:
-        # For GET requests, you can pre-populate a form or redirect.
-        return render(request, 'voting/edit_election.html', {'election': election})
+        messages.error(request, "Invalid request.")
+        return redirect('admin_dashboard')
 
 
 @login_required
@@ -220,8 +224,15 @@ def create_election(request):
         return redirect('admin_dashboard')
 
 
-def vote_stats_view(request):
-    return render(request, 'voting/vote_stats.html')
+@login_required
+def vote_stats_view(request, election_id):
+    # Get the election object based on the ID
+    election = get_object_or_404(Election, pk=election_id)
+    
+    # For now, simply render the template with the election in context.
+    # Later you can add statistics data.
+    return render(request, 'voting/vote_stats.html', {'election': election})
+
 
 def trail_detail_view(request):
     return render(request, 'voting/trail_detail.html')

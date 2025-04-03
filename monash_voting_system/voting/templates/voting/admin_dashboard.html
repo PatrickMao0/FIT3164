@@ -239,59 +239,43 @@
         <table>
           <thead>
             <tr>
-              <th style="width: 40%;">Election Name</th>
+              <th style="width: 50%;">Election Name</th>
               <th style="width: 20%;">Status</th>
-              <th style="width: 20%;">Actions</th>
-              <th style="width: 20%;">Statistics</th>
+              <th style="width: 30%;">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <!-- Sample row with an Edit button (data attributes for editing) -->
+            {% for election in elections %}
             <tr>
-              <td>Monash Debate Club - Secretary</td>
-              <td>Pending</td>
+              <td>{{ election.name }}</td>
+              <td>{{ election.status }}</td>
               <td>
+                {% if election.status != "Pending" %}
+                <button class="btn primary" 
+                onclick="window.location.href='{{ request.scheme }}://{{ request.get_host }}{% url 'vote_stats' election.id %}';">
+                  View Statistics
+                </button>
+                {% else %}
                 <button class="btn primary editElectionBtn" 
-                  data-election-id="1"
-                  data-name="Monash Debate Club - Secretary"
-                  data-description="Election for selecting the secretary."
-                  data-candidates='["Alice","Bob"]'
-                  data-start-date="2024-09-01"
-                  data-end-date="2024-09-15">
-                  Edit
-                </button>
+                          data-election-id="{{ election.id }}"
+                          data-name="{{ election.name }}"
+                          data-description="{{ election.description }}"
+                          data-candidates='{{ election.candidate_data|safe }}'
+                          data-start-date="{{ election.start_date|date:"Y-m-d" }}"
+                          data-end-date="{{ election.end_date|date:"Y-m-d" }}"
+                          data-club-id="{{ election.club.id }}"
+                          data-club-name="{{ election.club.name }}">
+                    Edit
+                </button>        
+                {% endif %}
               </td>
-              <td></td>
+
             </tr>
+            {% empty %}
             <tr>
-              <td>Monash Chess Club - President</td>
-              <td>Ongoing</td>
-              <td>
-                <button class="btn grey">Edit</button>
-              </td>
-              <td>
-                <button class="btn primary" onclick="window.location.href='vote_stats.html';">
-                  View Statistics
-                </button>
-              </td>
+              <td colspan="4">No elections available.</td>
             </tr>
-            <tr>
-              <td>Monash Robotics Club - Vice President</td>
-              <td>Completed</td>
-              <td>
-                <button class="btn primary viewResultsBtn"
-                  data-election-id="3"
-                  data-name="Monash Robotics Club - Vice President"
-                  data-results='{"Candidate 1": 150, "Candidate 2": 120, "Candidate 3": 90}'>
-                  View Results
-                </button>
-              </td>
-              <td>
-                <button class="btn primary" onclick="window.location.href='vote_stats.html';">
-                  View Statistics
-                </button>
-              </td>
-            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>
@@ -366,7 +350,6 @@
     <div class="modal-content">
       <div class="modal-header">Create New Election</div>
       <div class="modal-body">
-        <!-- The form now submits directly to the backend -->
         <form id="createElectionForm" action="{% url 'create_election' %}" method="POST">
           {% csrf_token %}
           <!-- Club Selection Field -->
@@ -393,9 +376,7 @@
           <div class="form-group" id="candidatesContainer">
             <label>Candidate Names:</label>
             <div class="candidate-field">
-              <!-- Create a select element for candidate selection -->
               <select name="candidateNames[]" class="candidate-select" required>
-                <!-- Start with an empty default option -->
                 <option value=""></option>
               </select>
             </div>
@@ -424,22 +405,33 @@
     <div class="modal-content">
       <div class="modal-header">Edit Election</div>
       <div class="modal-body">
-        <form id="editElectionForm">
+        <form id="editElectionForm" action="{% url 'update_election' %}" method="POST">
+          {% csrf_token %}
           <!-- Hidden field for election ID -->
           <input type="hidden" id="editElectionId" name="electionId">
+          <!-- Display associated Club (read-only) -->
+          <div class="form-group">
+            <label>Club:</label>
+            <span id="editClubDisplay"></span>
+            <input type="hidden" id="editClubName" name="clubName">
+          </div>
+          <!-- Election Name -->
           <div class="form-group">
             <label for="editElectionName">Election Name:</label>
             <input type="text" id="editElectionName" name="electionName" required>
           </div>
+          <!-- Election Description -->
           <div class="form-group">
             <label for="editElectionDescription">Election Description:</label>
             <textarea id="editElectionDescription" name="electionDescription" rows="3" required></textarea>
           </div>
+          <!-- Candidates Section -->
           <div class="form-group" id="editCandidatesContainer">
             <label>Candidate Names:</label>
-            <!-- Candidate fields will be populated dynamically as select elements -->
+            <!-- Candidate select fields will be populated dynamically -->
           </div>
           <button type="button" id="editAddCandidateBtn" class="btn primary" style="margin-bottom: 15px;">Add Candidate</button>
+          <!-- Start and End Dates -->
           <div class="form-group">
             <label for="editStartDate">Start Date:</label>
             <input type="date" id="editStartDate" name="startDate" required>
@@ -484,31 +476,28 @@
   <!-- JavaScript for Modal Behavior, Candidate Fields & Select Update -->
   <script>
     // clubCandidates is passed from the view as JSON.
-    var clubCandidates = {{ club_candidates_json|safe }};
+    var clubCandidates = JSON.parse('{{ club_candidates_json|escapejs }}');
+
   
-    // Rebuilds the options for all candidate select elements based on the current club.
+    // Rebuild candidate selects for the Create modal.
     function rebuildCandidateSelects() {
       var clubSelect = document.getElementById('clubName');
       var selectedClubId = clubSelect.value;
       var candidateData = clubCandidates[selectedClubId] || [];
       var selects = document.querySelectorAll('.candidate-select');
       selects.forEach(function(select) {
-        // Preserve current selection for this select.
         var currentValue = select.value;
-        select.innerHTML = ""; // Clear all options.
-        // Add an empty default option.
+        select.innerHTML = "";
         var emptyOption = document.createElement('option');
         emptyOption.value = "";
         emptyOption.text = "";
         select.appendChild(emptyOption);
-        // Add new options from candidateData.
         candidateData.forEach(function(candidate) {
           var option = document.createElement('option');
           option.value = candidate.username;
           option.text = candidate.full_name + " (" + candidate.username + ")";
           select.appendChild(option);
         });
-        // Restore previous selection if available.
         if (currentValue && select.querySelector('option[value="' + currentValue + '"]')) {
           select.value = currentValue;
         } else {
@@ -518,19 +507,17 @@
       updateDisabledOptions();
     }
   
-    // Updates the disabled state of options to prevent duplicate selections.
+    // Update function to disable duplicate candidate selections.
     function updateDisabledOptions() {
       var candidateSelects = Array.from(document.querySelectorAll('.candidate-select'));
-      // Collect all non-empty selected candidate usernames.
       let selectedValues = candidateSelects.map(function(select) {
         return select.value;
       }).filter(function(val) { return val !== ""; });
       
       candidateSelects.forEach(function(select) {
-        // For each option in this select, disable it if its value appears in another select.
         Array.from(select.options).forEach(function(option) {
           if (option.value === "") {
-            option.disabled = false; // The empty option remains enabled.
+            option.disabled = false;
           } else if (select.value !== option.value && selectedValues.includes(option.value)) {
             option.disabled = true;
           } else {
@@ -540,10 +527,57 @@
       });
     }
   
-    // When the club selection changes, rebuild all candidate selects.
     document.getElementById('clubName').addEventListener('change', rebuildCandidateSelects);
   
-    // Create a new candidate field as a <select> element.
+    // Helper function to create a candidate field using club-specific candidate options for the Edit modal.
+    function createCandidateFieldWithClub(containerSelector, candidateList) {
+      const candidateDiv = document.createElement('div');
+      candidateDiv.classList.add('candidate-field');
+      
+      const select = document.createElement('select');
+      select.name = 'candidateNames[]';
+      select.required = true;
+      select.classList.add('candidate-select');
+      
+      // Create an empty option.
+      const emptyOption = document.createElement('option');
+      emptyOption.value = "";
+      emptyOption.text = "";
+      select.appendChild(emptyOption);
+      
+      // Populate the select with candidates from the club.
+      candidateList.forEach(function(candidate) {
+        const option = document.createElement('option');
+        option.value = candidate.username;
+        option.text = candidate.full_name + " (" + candidate.username + ")";
+        select.appendChild(option);
+      });
+      
+      // When the select changes, update disabled options.
+      select.addEventListener('change', updateDisabledOptions);
+      
+      // Create a "Remove" button for this candidate field.
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.classList.add('removeCandidateBtn');
+      removeBtn.textContent = 'Remove';
+      removeBtn.addEventListener('click', function() {
+        const container = document.querySelector(containerSelector);
+        const candidateFields = container.querySelectorAll('.candidate-field');
+        if (candidateFields.length > 1) {
+          candidateDiv.remove();
+          updateDisabledOptions();
+        } else {
+          alert("At least one candidate is required.");
+        }
+      });
+      
+      candidateDiv.appendChild(select);
+      candidateDiv.appendChild(removeBtn);
+      return candidateDiv;
+    }
+  
+    // Helper function to create a candidate field (for the Create modal) using existing logic.
     function createCandidateField(containerSelector) {
       const candidateDiv = document.createElement('div');
       candidateDiv.classList.add('candidate-field');
@@ -552,11 +586,9 @@
       select.name = 'candidateNames[]';
       select.required = true;
       select.classList.add('candidate-select');
-      // Build options for this select based on the current club.
       let clubSelect = document.getElementById('clubName');
       let selectedClubId = clubSelect.value;
       let candidateData = clubCandidates[selectedClubId] || [];
-      // Add an empty default option.
       let emptyOption = document.createElement('option');
       emptyOption.value = "";
       emptyOption.text = "";
@@ -567,7 +599,6 @@
         option.text = candidate.full_name + " (" + candidate.username + ")";
         select.appendChild(option);
       });
-      // Attach a change listener to update disabled options.
       select.addEventListener('change', updateDisabledOptions);
       
       const removeBtn = document.createElement('button');
@@ -590,14 +621,14 @@
       return candidateDiv;
     }
     
-    // Reset candidate fields in a container (used when opening a modal)
+    // Reset candidate fields for a given container.
     function resetCandidateFields(containerSelector) {
       const container = document.querySelector(containerSelector);
       container.innerHTML = '<label>Candidate Names:</label>';
       container.appendChild(createCandidateField(containerSelector));
     }
     
-    /* ---------- Create Election Modal Logic ---------- */
+    // Create Election Modal Logic
     document.getElementById('openCreateElection').addEventListener('click', function() {
       document.getElementById('createElectionModal').style.display = 'block';
       resetCandidateFields('#candidatesContainer');
@@ -606,8 +637,8 @@
     
     function closeCreateModal() {
       document.getElementById('createElectionModal').style.display = 'none';
-      // Do not call form.reset() here to avoid clearing values before submission if using standard POST.
-      // If you want to reset after a successful submission, do it in the view redirection.
+      document.getElementById('createElectionForm').reset();
+      resetCandidateFields('#candidatesContainer');
     }
     
     document.getElementById('closeCreateModal').addEventListener('click', closeCreateModal);
@@ -624,41 +655,83 @@
       updateDisabledOptions();
     });
     
-    // Remove the JavaScript submit handler so that the form submits naturally
-    // to the backend via its action attribute.
-    // (Ensure your form tag has: action="{% url 'create_election' %}" method="POST")
+    // Global variable to hold current club id for editing.
+    let currentEditingClubId = null;
     
-    /* ---------- Edit Election Modal Logic ---------- */
+    // Edit Election Modal Logic
     document.querySelectorAll('.editElectionBtn').forEach(function(button) {
       button.addEventListener('click', function() {
+        // Retrieve election details from the button’s data attributes.
         const electionId = this.getAttribute('data-election-id');
-        const name = this.getAttribute('data-name');
-        const description = this.getAttribute('data-description');
-        const candidates = JSON.parse(this.getAttribute('data-candidates'));
+        const electionName = this.getAttribute('data-name');
+        const electionDescription = this.getAttribute('data-description');
+        const clubId = this.getAttribute('data-club-id');
+        const clubName = this.getAttribute('data-club-name');
+        currentEditingClubId = clubId;
+        
+        let existingCandidates = [];
+        try {
+          existingCandidates = JSON.parse(this.getAttribute('data-candidates') || '[]');
+          console.log("Existing candidates:", existingCandidates);
+        } catch (e) {
+          console.error("Failed to parse candidate data:", e);
+        }
         const startDate = this.getAttribute('data-start-date');
         const endDate = this.getAttribute('data-end-date');
-        
+  
+        // Populate form fields.
         document.getElementById('editElectionId').value = electionId;
-        document.getElementById('editElectionName').value = name;
-        document.getElementById('editElectionDescription').value = description;
+        document.getElementById('editElectionName').value = electionName;
+        document.getElementById('editElectionDescription').value = electionDescription;
         document.getElementById('editStartDate').value = startDate;
         document.getElementById('editEndDate').value = endDate;
         
+        // Set the club display and hidden input.
+        document.getElementById('editClubDisplay').innerText = clubName;
+        document.getElementById('editClubName').value = clubId;
+        
+        // Retrieve candidate list for this club.
+        let clubCandidateList = clubCandidates[clubId] || [];
+        console.log("Club candidate list:", clubCandidateList);
+        
+        // Clear the candidate container.
         const editCandidatesContainer = document.getElementById('editCandidatesContainer');
         editCandidatesContainer.innerHTML = '<label>Candidate Names:</label>';
-        if (candidates.length > 0) {
-          candidates.forEach(function(candidate) {
-            const field = createCandidateField('#editCandidatesContainer');
-            // Set the select's value to the candidate (if available)
-            field.querySelector('select').value = candidate;
+        
+        // Loop through existingCandidates and create a candidate field for each.
+        if (existingCandidates.length > 0) {
+          existingCandidates.forEach(function(candidate) {
+            const field = createCandidateFieldWithClub('#editCandidatesContainer', clubCandidateList);
             editCandidatesContainer.appendChild(field);
+            if (typeof candidate === 'object' && candidate.username) {
+              field.querySelector('select').value = candidate.username;
+            } else {
+              field.querySelector('select').value = candidate;
+            }
+            console.log("Set candidate field value to:", field.querySelector('select').value);
           });
         } else {
-          editCandidatesContainer.appendChild(createCandidateField('#editCandidatesContainer'));
+          // If no candidates exist, create one empty candidate field.
+          editCandidatesContainer.appendChild(createCandidateFieldWithClub('#editCandidatesContainer', clubCandidateList));
         }
-        rebuildCandidateSelects();
+        
+        updateDisabledOptions();
+        
+        // Display the edit modal.
         document.getElementById('editElectionModal').style.display = 'block';
       });
+    });
+    
+    // "Add Candidate" button functionality in the edit modal.
+    document.getElementById('editAddCandidateBtn').addEventListener('click', function() {
+      if (!currentEditingClubId) {
+        alert("Club information is missing.");
+        return;
+      }
+      let clubCandidateList = clubCandidates[currentEditingClubId] || [];
+      const container = document.getElementById('editCandidatesContainer');
+      container.appendChild(createCandidateFieldWithClub('#editCandidatesContainer', clubCandidateList));
+      updateDisabledOptions();
     });
     
     function closeEditModal() {
@@ -675,70 +748,7 @@
       }
     });
     
-    document.getElementById('editAddCandidateBtn').addEventListener('click', function() {
-      const container = document.getElementById('editCandidatesContainer');
-      container.appendChild(createCandidateField('#editCandidatesContainer'));
-      updateDisabledOptions();
-    });
-    
-    document.getElementById('editElectionForm').addEventListener('submit', function(event) {
-      // For edit, you can choose to remove event.preventDefault() as well if you want standard POST.
-      // event.preventDefault();
-      
-      const electionData = {
-        id: document.getElementById('editElectionId').value,
-        name: document.getElementById('editElectionName').value,
-        description: document.getElementById('editElectionDescription').value,
-        candidates: Array.from(document.querySelectorAll('#editCandidatesContainer .candidate-select')).map(select => select.value),
-        startDate: document.getElementById('editStartDate').value,
-        endDate: document.getElementById('editEndDate').value
-      };
-      
-      console.log("Election updated:", electionData);
-      alert("Election updated successfully!");
-      
-      closeEditModal();
-    });
-    
-    /* ---------- View Results Modal Logic ---------- */
-    document.querySelectorAll('.viewResultsBtn').forEach(function(button) {
-      button.addEventListener('click', function() {
-        const electionId = this.getAttribute('data-election-id');
-        const electionName = this.getAttribute('data-name');
-        const resultsJSON = this.getAttribute('data-results');
-        const results = JSON.parse(resultsJSON);
-        
-        document.getElementById('resultsElectionName').textContent = "Results for: " + electionName;
-        const resultsTableBody = document.querySelector('#resultsTable tbody');
-        resultsTableBody.innerHTML = "";
-        
-        for (let candidate in results) {
-          const row = document.createElement('tr');
-          const candidateCell = document.createElement('td');
-          candidateCell.textContent = candidate;
-          const votesCell = document.createElement('td');
-          votesCell.textContent = results[candidate];
-          row.appendChild(candidateCell);
-          row.appendChild(votesCell);
-          resultsTableBody.appendChild(row);
-        }
-        
-        document.getElementById('viewResultsModal').style.display = 'block';
-      });
-    });
-    
-    document.getElementById('closeResultsModal').addEventListener('click', function() {
-      document.getElementById('viewResultsModal').style.display = 'none';
-    });
-    
-    window.addEventListener('click', function(event) {
-      const modal = document.getElementById('viewResultsModal');
-      if (event.target === modal) {
-        document.getElementById('viewResultsModal').style.display = 'none';
-      }
-    });
-    
-    // Initialize candidate selects on page load
+    // Initialize candidate selects on page load.
     rebuildCandidateSelects();
   </script>
 </body>
