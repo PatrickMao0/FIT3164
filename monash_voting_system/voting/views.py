@@ -226,12 +226,9 @@ def create_election(request):
 
 @login_required
 def vote_stats_view(request, election_id):
-    # Get the election object based on the ID
     election = get_object_or_404(Election, pk=election_id)
-    
-    # For now, simply render the template with the election in context.
-    # Later you can add statistics data.
     return render(request, 'voting/vote_stats.html', {'election': election})
+
 
 
 def trail_detail_view(request):

@@ -197,7 +197,7 @@
       <h1 class="title">Election: {{ election.name }}</h1>
       <p class="description">
         Club: {{ election.club.name }}<br>
-        Election Period: {{ election.start_date|date:"Y-m-d H:i:s" }} to {{ election.end_date|date:"Y-m-d H:i:s" }}<br>
+        Election Period: {{ election.start_date|date:"Y-m-d" }} to {{ election.end_date|date:"Y-m-d" }}<br>
         {% if election.description %}{{ election.description }}{% endif %}
       </p>
       <form id="votingForm" action="{% url 'voting' election.id %}" method="POST" class="voting-form">
