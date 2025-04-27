@@ -1,14 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login
 from django.contrib import messages
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Election, Membership, Candidate, Vote, Club
-import json
 from django.http import JsonResponse, HttpResponseForbidden
+from .models import Election, Membership, Candidate, Vote, Club, UserProfile
+
+
+import json
 from datetime import datetime
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
+from django.db.models import Count, F, Value, CharField
+from django.db.models.functions import Concat, Coalesce
+
 
 def login_view(request):
     if request.method == "POST":
@@ -224,11 +230,150 @@ def create_election(request):
         return redirect('admin_dashboard')
 
 
+
+
+
+
+def _labels_and_counts(queryset, field, choices_dict):
+    """
+    Return two lists:
+
+      labels -> human-readable names from choices_dict
+      data   -> integer counts for each label
+
+    The queryset should already be filtered to the population you
+    care about (e.g. all voters in an election).
+    """
+    counts = (
+        queryset
+        .values(code=F(field))
+        .annotate(total=Count(field))
+        .order_by()          # keep DB from auto-ordering by code
+    )
+    labels = [choices_dict.get(row["code"], "Unknown") for row in counts]
+    data   = [row["total"] for row in counts]
+    return labels, data
+
+
+
+
 @login_required
+@user_passes_test(is_club_admin)
 def vote_stats_view(request, election_id):
     election = get_object_or_404(Election, pk=election_id)
-    return render(request, 'voting/vote_stats.html', {'election': election})
 
+    # 1) Voter turnout
+    total_members = Membership.objects.filter(club=election.club).count()
+    total_votes = Vote.objects.filter(election=election).count()
+    turnout_data = [total_votes, max(total_members - total_votes, 0)]
+
+    # 2) Votes per candidate
+    per_cand = (
+        Vote.objects
+            .filter(election=election)
+            .values(               # build a readable label for every row
+                name=Concat(
+                    Coalesce('candidate__user__first_name', Value('')),
+                    Value(' '),
+                    Coalesce('candidate__user__last_name',  Value('')),
+                    output_field=CharField(),
+                ),
+                username=F('candidate__user__username'),
+            )
+            .annotate(total=Count('id'))
+            .order_by('-total')
+    )
+
+    cand_labels = [
+        (row['name'].strip() or row['username'])   # full name or username
+        for row in per_cand
+    ]
+    cand_data   = [row['total'] for row in per_cand]
+
+    # ---------------------------------------------------------------------
+    # 3) Profile-based breakdowns (gender / category)
+    # ---------------------------------------------------------------------
+    voters = UserProfile.objects.filter(
+        user__votes_cast__election=election
+    ).distinct()
+
+    gender_labels,   gender_data   = _labels_and_counts(
+        voters, "gender",   dict(UserProfile.GENDER_CHOICES)
+    )
+    category_labels, category_data = _labels_and_counts(
+        voters, "role",     dict(UserProfile.ROLE_CHOICES)
+    )
+
+    # ---------------------------------------------------------------------
+    # 4) Votes by FACULTY  –  stacked UG vs PG
+    # ---------------------------------------------------------------------
+    faculty_labels = []
+    ug_counts      = []
+    pg_counts      = []
+
+    for fac_code, fac_label in UserProfile.FACULTY_CHOICES:
+        ug_total = Vote.objects.filter(
+            election=election,
+            voter__userprofile__faculty=fac_code,
+            voter__userprofile__level_of_education="UG"
+        ).count()
+
+        pg_total = Vote.objects.filter(
+            election=election,
+            voter__userprofile__faculty=fac_code,
+            voter__userprofile__level_of_education="PG"
+        ).count()
+
+        # skip faculties with zero votes (optional)
+        if ug_total or pg_total:
+            faculty_labels.append(fac_label)
+            ug_counts.append(ug_total)
+            pg_counts.append(pg_total)
+
+    faculty_stacked = {
+        "labels": faculty_labels,
+        "ug":     ug_counts,
+        "pg":     pg_counts,
+    }
+
+    # ---------------------------------------------------------------------
+    # 5) Campus turnout (voted vs not-voted)
+    # ---------------------------------------------------------------------
+    campus_stats = []
+    for campus_code, campus_label in UserProfile.CAMPUS_CHOICES:
+        members = Membership.objects.filter(
+            club=election.club,
+            user__userprofile__campus_location=campus_code
+        ).count()
+
+        votes = Vote.objects.filter(
+            election=election,
+            voter__userprofile__campus_location=campus_code
+        ).values("voter_id").distinct().count()
+
+        campus_stats.append({
+            "name":     campus_label,
+            "voted":    votes,
+            "notVoted": max(members - votes, 0),
+        })
+
+    # ---------------------------------------------------------------------
+    # 6) Pack everything for the template
+    # ---------------------------------------------------------------------
+    stats = {
+        "turnout":      {"labels": ["Voted", "Did Not Vote"], "data": turnout_data},
+        "perCandidate": {"labels": cand_labels,  "data": cand_data},
+        "faculty":      faculty_stacked,         # ← stacked structure
+        "gender":       {"labels": gender_labels,"data": gender_data},
+        "category":     {"labels": category_labels,"data": category_data},
+        "campus":       campus_stats,
+    }
+
+    return render(
+        request,
+        "voting/vote_stats.html",
+        {"election": election, "stats_json": json.dumps(stats)},
+    )
 
 
 def trail_detail_view(request):
