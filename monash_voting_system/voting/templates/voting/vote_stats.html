@@ -174,8 +174,16 @@
       <h3 class="section-title">Votes by Faculty</h3>
       <canvas id="facultyVotesChart" class="bar-chart"></canvas>
     </div>
+
+    <div class="statistics-section">
+      <h3 class="section-title">Voting Pace (Cumulative)</h3>
+      <canvas id="paceChart" class="bar-chart"></canvas>
+    </div>
+
   </div>
 </main>
+
+
 
 <footer>
   <a href="/help" class="footer-link">Help</a>
@@ -211,7 +219,7 @@ new Chart(document.getElementById('voterTurnoutChart'), {
     labels: STATS.turnout.labels,
     datasets:[{
       data: STATS.turnout.data,
-      backgroundColor: colours(2),           // ← use palette
+      backgroundColor: [ C(1), C(0) ],           
       borderColor   : '#FFF', borderWidth:2
     }]
   },
@@ -242,7 +250,7 @@ STATS.campus.forEach((c, i) => {
       labels:['Voted','Did Not Vote'],
       datasets:[{
         data:[c.voted, c.notVoted],
-        backgroundColor: [ C(0), C(1) ],    
+        backgroundColor: [ C(1), C(0) ],    
         borderColor:'#FFF', borderWidth:2
       }]
     },
@@ -309,6 +317,82 @@ STATS.campus.forEach((c, i) => {
   }
 });
 
+
+/* — Voting Pace (cumulative votes as % of total members) — */
+(() => {
+  const [voted, notVoted] = STATS.turnout.data;
+  const totalMembers = voted + notVoted || 1;
+  // raw cumulative counts
+  const counts = STATS.pace.data;
+  // convert to percent of total members
+  const percentData = counts.map(c => (c / totalMembers) * 100);
+
+  new Chart(document.getElementById("paceChart"), {
+    type: "line",
+    data: {
+      labels: STATS.pace.labels,    
+      datasets: [{
+        label:           "Cumulative Pace (%)",
+        data:            percentData,
+        fill:            true,
+        backgroundColor: "rgba(27,158,119,0.2)",
+        borderColor:     "#1B9E77",
+        borderWidth:     2,
+        tension:         0.3
+      }]
+    },
+    options: {
+      responsive:          true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          mode: "index",
+          intersect: false,
+          callbacks: {
+            label: ctx => {
+              const i = ctx.dataIndex;
+              const rawCount = counts[i];
+              const pct      = percentData[i].toFixed(1);
+              return `${rawCount} votes (${pct}%)`;
+            }
+          }
+        },
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          type: "category",
+          labels: STATS.pace.labels,
+          title: { display: true, text: "Date" },
+          grid:  { display: false },
+          ticks: {
+            autoSkip: false,
+            maxRotation: 0,
+            callback: function(value) {
+              const full = this.getLabelForValue(value); // "2025-03-27 00:00"
+              const d = new Date(full);
+              return d.toLocaleDateString(undefined, {
+                day:   "numeric",
+                month: "short",
+                year:  "numeric"
+              });
+            }
+          }
+        },
+        y: {
+          title:       { display: true, text: "Percent of Members" },
+          beginAtZero: true,
+          max:         100,
+          ticks: {
+            callback: v => `${v}%`,
+            stepSize: 10
+          },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+})();
 
 
 

@@ -13,7 +13,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.db.models import Count, F, Value, CharField
-from django.db.models.functions import Concat, Coalesce
+from django.db.models.functions import Concat, Coalesce,TruncHour
 
 
 def login_view(request):
@@ -264,116 +264,110 @@ def vote_stats_view(request, election_id):
 
     # 1) Voter turnout
     total_members = Membership.objects.filter(club=election.club).count()
-    total_votes = Vote.objects.filter(election=election).count()
-    turnout_data = [total_votes, max(total_members - total_votes, 0)]
+    total_votes   = Vote.objects.filter(election=election).count()
+    turnout_data  = [total_votes, max(total_members - total_votes, 0)]
 
-    # 2) Votes per candidate
+    # 2) Votes per candidate (full name or fallback to username)
     per_cand = (
-        Vote.objects
-            .filter(election=election)
-            .values(               # build a readable label for every row
+        Vote.objects.filter(election=election)
+            .values(
                 name=Concat(
                     Coalesce('candidate__user__first_name', Value('')),
                     Value(' '),
                     Coalesce('candidate__user__last_name',  Value('')),
-                    output_field=CharField(),
+                    output_field=CharField()
                 ),
-                username=F('candidate__user__username'),
+                username=F('candidate__user__username')
             )
             .annotate(total=Count('id'))
             .order_by('-total')
     )
-
     cand_labels = [
-        (row['name'].strip() or row['username'])   # full name or username
+        (row['name'].strip() or row['username'])
         for row in per_cand
     ]
-    cand_data   = [row['total'] for row in per_cand]
+    cand_data = [row['total'] for row in per_cand]
 
-    # ---------------------------------------------------------------------
-    # 3) Profile-based breakdowns (gender / category)
-    # ---------------------------------------------------------------------
-    voters = UserProfile.objects.filter(
-        user__votes_cast__election=election
-    ).distinct()
+    # 3) Gender & category breakdown
+    voters = UserProfile.objects.filter(user__votes_cast__election=election).distinct()
+    def _labels_and_counts(qs, field, choices):
+        cnts = qs.values(code=F(field)).annotate(total=Count(field)).order_by()
+        return [dict(choices).get(r['code'],'Unknown') for r in cnts], [r['total'] for r in cnts]
 
-    gender_labels,   gender_data   = _labels_and_counts(
-        voters, "gender",   dict(UserProfile.GENDER_CHOICES)
-    )
-    category_labels, category_data = _labels_and_counts(
-        voters, "role",     dict(UserProfile.ROLE_CHOICES)
-    )
+    gender_labels,   gender_data   = _labels_and_counts(voters, "gender",   UserProfile.GENDER_CHOICES)
+    category_labels, category_data = _labels_and_counts(voters, "role",     UserProfile.ROLE_CHOICES)
 
-    # ---------------------------------------------------------------------
-    # 4) Votes by FACULTY  –  stacked UG vs PG
-    # ---------------------------------------------------------------------
+    # 4) Votes by faculty (stacked UG vs PG)
     faculty_labels = []
-    ug_counts      = []
-    pg_counts      = []
-
-    for fac_code, fac_label in UserProfile.FACULTY_CHOICES:
-        ug_total = Vote.objects.filter(
+    ug_counts = []
+    pg_counts = []
+    for code, label in UserProfile.FACULTY_CHOICES:
+        ug = Vote.objects.filter(
             election=election,
-            voter__userprofile__faculty=fac_code,
-            voter__userprofile__level_of_education="UG"
+            voter__userprofile__faculty=code,
+            voter__userprofile__level_of_education='UG'
         ).count()
-
-        pg_total = Vote.objects.filter(
+        pg = Vote.objects.filter(
             election=election,
-            voter__userprofile__faculty=fac_code,
-            voter__userprofile__level_of_education="PG"
+            voter__userprofile__faculty=code,
+            voter__userprofile__level_of_education='PG'
         ).count()
+        if ug or pg:
+            faculty_labels.append(label)
+            ug_counts.append(ug)
+            pg_counts.append(pg)
+    faculty_stacked = {"labels": faculty_labels, "ug": ug_counts, "pg": pg_counts}
 
-        # skip faculties with zero votes (optional)
-        if ug_total or pg_total:
-            faculty_labels.append(fac_label)
-            ug_counts.append(ug_total)
-            pg_counts.append(pg_total)
-
-    faculty_stacked = {
-        "labels": faculty_labels,
-        "ug":     ug_counts,
-        "pg":     pg_counts,
-    }
-
-    # ---------------------------------------------------------------------
-    # 5) Campus turnout (voted vs not-voted)
-    # ---------------------------------------------------------------------
+    # 5) Campus turnout
     campus_stats = []
-    for campus_code, campus_label in UserProfile.CAMPUS_CHOICES:
+    for code, label in UserProfile.CAMPUS_CHOICES:
         members = Membership.objects.filter(
             club=election.club,
-            user__userprofile__campus_location=campus_code
+            user__userprofile__campus_location=code
         ).count()
-
         votes = Vote.objects.filter(
             election=election,
-            voter__userprofile__campus_location=campus_code
-        ).values("voter_id").distinct().count()
-
+            voter__userprofile__campus_location=code
+        ).values('voter_id').distinct().count()
         campus_stats.append({
-            "name":     campus_label,
+            "name":     label,
             "voted":    votes,
             "notVoted": max(members - votes, 0),
         })
 
-    # ---------------------------------------------------------------------
-    # 6) Pack everything for the template
-    # ---------------------------------------------------------------------
+    # 6) Voting pace – cumulative votes over time (hourly)
+    hourly = (
+        Vote.objects.filter(election=election)
+            .annotate(hour=TruncHour('timestamp'))
+            .values('hour')
+            .annotate(count=Count('id'))
+            .order_by('hour')
+    )
+    running = 0
+    pace_labels = []
+    pace_data   = []
+    for row in hourly:
+        running += row['count']
+        pace_labels.append(row['hour'].strftime('%Y-%m-%d %H:%M'))
+        pace_data.append(running)
+
+    # Pack everything into one stats dict
     stats = {
         "turnout":      {"labels": ["Voted", "Did Not Vote"], "data": turnout_data},
-        "perCandidate": {"labels": cand_labels,  "data": cand_data},
-        "faculty":      faculty_stacked,         # ← stacked structure
-        "gender":       {"labels": gender_labels,"data": gender_data},
-        "category":     {"labels": category_labels,"data": category_data},
+        "perCandidate": {"labels": cand_labels,               "data": cand_data},
+        "gender":       {"labels": gender_labels,             "data": gender_data},
+        "category":     {"labels": category_labels,           "data": category_data},
+        "faculty":      faculty_stacked,
         "campus":       campus_stats,
+        "pace":         {"labels": pace_labels, "data": pace_data},
     }
 
-    return render(
-        request,
-        "voting/vote_stats.html",
-        {"election": election, "stats_json": json.dumps(stats)},
-    )
+    return render(request, "voting/vote_stats.html", {
+        "election":   election,
+        "stats_json": json.dumps(stats),
+    })
+
+
 
 
 def trail_detail_view(request):
