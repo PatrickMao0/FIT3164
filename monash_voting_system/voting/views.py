@@ -8,10 +8,6 @@ from .models import Election, Membership, Candidate, Vote, Club, UserProfile
 
 import json
 from datetime import datetime
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
 from django.db.models import Count, F, Value, CharField
 from django.db.models.functions import Concat, Coalesce,TruncHour
 
@@ -362,10 +358,47 @@ def vote_stats_view(request, election_id):
         "pace":         {"labels": pace_labels, "data": pace_data},
     }
 
+        # 7) Radar: votes by faculty for each candidate
+    radar_labels = [ label for code, label in UserProfile.FACULTY_CHOICES ]
+
+    radar_data = {}
+    for row in per_cand:
+        username     = row["username"]
+        display_name = (row["name"].strip() or username)
+
+        candidate = Candidate.objects.get(
+            user__username=username,
+            club=election.club
+        )
+
+        # count this candidate’s votes in each faculty
+        counts = []
+        for code, _label in UserProfile.FACULTY_CHOICES:
+            c = Vote.objects.filter(
+                election=election,
+                candidate=candidate,
+                voter__userprofile__faculty=code
+            ).count()
+            counts.append(c)
+
+        radar_data[display_name] = counts
+
+    stats["radar"] = {
+        "labels": radar_labels,
+        "data":   radar_data,
+    }
+
     return render(request, "voting/vote_stats.html", {
         "election":   election,
         "stats_json": json.dumps(stats),
     })
+
+
+
+
+
+
+
 
 
 

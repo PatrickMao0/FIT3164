@@ -104,8 +104,8 @@
     .large-chart {
       display: block;
       margin: 0 auto;
-      width: 300px !important;
-      height: 300px !important;
+      width: 500px !important;
+      height: 500px !important;
     }
 
     .small-chart {
@@ -138,6 +138,7 @@
       font-size: 14px;
       margin-top: 6px;
     }
+
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -178,6 +179,13 @@
     <div class="statistics-section">
       <h3 class="section-title">Voting Pace (Cumulative)</h3>
       <canvas id="paceChart" class="bar-chart"></canvas>
+    </div>
+
+    <div class="statistics-section">
+      <h3 class="section-title">Votes by Faculty (Radar)</h3>
+      <div id="candidateControls">
+      </div>
+      <canvas id="facultyRadarChart" class="large-chart"></canvas>
     </div>
 
   </div>
@@ -395,7 +403,75 @@ STATS.campus.forEach((c, i) => {
 })();
 
 
+// 8) Radar chart with hard‐coded short faculty labels
 
+
+// 3) Hard‐coded, short faculty labels in FACULTY_CHOICES order
+const RADAR_LABELS = [
+  ['Art, Design &','Architecture'],      
+  ['Arts'],
+  ['Business &','Economics'],
+  ['Education'],
+  ['Engineering'],
+  ['Information','Technology'],
+  ['Law'],
+  ['Medicine, Nursing','& Health Sciences'],
+  ['Pharmacy &','Pharmaceutical Sciences'],
+  ['Science']
+];
+
+// — build one dataset per candidate, each with its own colour
+const candidateNames = Object.keys(STATS.radar.data);
+const cols = colours(candidateNames.length);
+const radarDatasets = candidateNames.map((name, i) => ({
+  label: name,
+  data:   STATS.radar.data[name] || [],
+  fill:   true,
+  backgroundColor: cols[i] + '33',  // semi-transparent fill
+  borderColor:     cols[i],         // matching outline
+  borderWidth:     2,
+  pointBackgroundColor: cols[i],
+  pointBorderColor:     '#fff',
+  pointRadius:          4,
+  pointHoverRadius:     6
+}));
+
+// — instantiate the radar chart
+const ctx = document.getElementById('facultyRadarChart').getContext('2d');
+new Chart(ctx, {
+  type: 'radar',
+  data: {
+    labels:   RADAR_LABELS,
+    datasets: radarDatasets
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: {
+      padding: {
+        right:  40
+      }
+    },
+    scales: {
+      r: {
+        beginAtZero: true,
+        ticks: { stepSize: 1 },
+        pointLabels: { font: { size: 10 }, padding: 10 }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'top',
+        align: 'center',
+        labels: {
+          boxWidth: 12,
+          padding: 4
+        }
+      }
+    }
+  }
+});
 </script>
+
 </body>
 </html>
