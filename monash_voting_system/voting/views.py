@@ -260,8 +260,15 @@ def vote_stats_view(request, election_id):
 
     # 1) Voter turnout
     total_members = Membership.objects.filter(club=election.club).count()
-    total_votes   = Vote.objects.filter(election=election).count()
-    turnout_data  = [total_votes, max(total_members - total_votes, 0)]
+    total_votes = (
+        Vote.objects
+            .filter(election=election)
+            .values('voter_id')    # group by voter
+            .distinct()
+            .count()
+    )
+    not_voted    = max(total_members - total_votes, 0)
+    turnout_data = [total_votes, not_voted]
 
     # 2) Votes per candidate (full name or fallback to username)
     per_cand = (
