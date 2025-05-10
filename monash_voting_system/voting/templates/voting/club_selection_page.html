@@ -264,11 +264,11 @@
                 {{ vote.election.club.name }} - {{ vote.election.name }}
               </p>
               <p class="vote-status">
-                Status: <strong>{{ vote.election.status }}</strong>
+                Status: <strong>{{ vote.election.date_status }}</strong>
               </p>
 
               <!-- If the election is ended, show a winner box or other logic as needed -->
-              {% if vote.election.status == 'Ended' %}
+              {% if vote.election.date_status == 'Ended' %}
                 <div class="winner-box">
                   <p>Winner: <strong>{{ vote.election.get_winner }}</strong></p>
                 </div>
@@ -283,7 +283,7 @@
                   '{{ vote.election.name|escapejs }}',
                   '{{ vote.election.start_date|date:'Y-m-d'|escapejs }}',
                   '{{ vote.election.end_date|date:'Y-m-d'|escapejs }}',
-                  '{{ vote.election.status|escapejs }}',
+                  '{{ vote.election.date_status|escapejs }}',
                   '{{ vote.timestamp|date:'Y-m-d H:i:s'|escapejs }}',
                   '{{ vote.candidate.user.first_name|escapejs }}',
                   '{{ vote.candidate.user.last_name|escapejs }}'

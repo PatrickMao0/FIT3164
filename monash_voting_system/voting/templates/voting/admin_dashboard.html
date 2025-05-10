@@ -239,41 +239,50 @@
         <table>
           <thead>
             <tr>
-              <th style="width: 50%;">Election Name</th>
-              <th style="width: 20%;">Status</th>
-              <th style="width: 30%;">Actions</th>
+              <th style="width:50%;">Election Name</th>
+              <th style="width:20%;">Status</th>
+              <th style="width:30%;">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for election in elections %}
             <tr>
               <td>{{ election.name }}</td>
-              <td>{{ election.status }}</td>
+
+              {# show the combined management status #}
+              <td>{{ election.management_status }}</td>
+
               <td>
-                {% if election.status != "Pending" %}
-                <button class="btn primary" 
-                onclick="window.location.href='{{ request.scheme }}://{{ request.get_host }}{% url 'vote_stats' election.id %}';">
-                  View Statistics
-                </button>
+                {# 1) Pending (submitted, waiting for approval) – still editable #}
+                {% if election.management_status == "Pending Approval" %}
+                  <button
+                    class="btn primary editElectionBtn"
+                    data-election-id="{{ election.id }}"
+                    data-name="{{ election.name }}"
+                    data-description="{{ election.description }}"
+                    data-candidates='{{ election.candidate_data|safe }}'
+                    data-start-date="{{ election.start_date|date:"Y-m-d" }}"
+                    data-end-date="{{ election.end_date|date:"Y-m-d" }}"
+                    data-club-id="{{ election.club.id }}"
+                    data-club-name="{{ election.club.name }}"
+                  >Edit</button>
+
+                {# 2) Approved (approved, waiting for start_date) – greyed out #}
+                {% elif election.management_status == "Scheduled" %}
+                  <button class="btn grey" disabled>Edit</button>
+
+                {# 3&4) Ongoing or Ended – show statistics #}
                 {% else %}
-                <button class="btn primary editElectionBtn" 
-                          data-election-id="{{ election.id }}"
-                          data-name="{{ election.name }}"
-                          data-description="{{ election.description }}"
-                          data-candidates='{{ election.candidate_data|safe }}'
-                          data-start-date="{{ election.start_date|date:"Y-m-d" }}"
-                          data-end-date="{{ election.end_date|date:"Y-m-d" }}"
-                          data-club-id="{{ election.club.id }}"
-                          data-club-name="{{ election.club.name }}">
-                    Edit
-                </button>        
+                  <button
+                    class="btn primary"
+                    onclick="window.location.href='{{ request.scheme }}://{{ request.get_host }}{% url 'vote_stats' election.id %}';"
+                  >View Statistics</button>
                 {% endif %}
               </td>
-
             </tr>
             {% empty %}
             <tr>
-              <td colspan="4">No elections available.</td>
+              <td colspan="3">No elections available.</td>
             </tr>
             {% endfor %}
           </tbody>

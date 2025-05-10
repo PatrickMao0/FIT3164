@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse, HttpResponseForbidden
 from .models import Election, Membership, Candidate, Vote, Club, UserProfile
+from django.utils import timezone
 
 
 import json
@@ -52,11 +53,10 @@ from .models import Membership, Election
 def club_selection_view(request):
     # Get all clubs the user has membership in
     membership_clubs = Membership.objects.filter(user=request.user).values_list('club', flat=True)
-    print("DEBUG: membership_clubs =", list(membership_clubs))
+
 
     # Filter elections for those clubs, but only those that are "Ongoing"
-    elections = Election.objects.filter(club__in=membership_clubs, status='Ongoing')
-    print("DEBUG: elections =", list(elections))
+    elections = Election.objects.live().filter(club__in=membership_clubs)
 
     # Retrieve previous votes for the clubs the user is a member of
     previous_votes = Vote.objects.filter(
@@ -66,7 +66,7 @@ def club_selection_view(request):
 
     # Create a list of election IDs that the user has already voted in
     voted_election_ids = list(Vote.objects.filter(voter=request.user).values_list('election_id', flat=True))
-    print("DEBUG: voted_election_ids =", voted_election_ids)
+
 
     return render(request, 'voting/club_selection_page.html', {
         'elections': elections,
@@ -109,17 +109,16 @@ def voting_view(request, election_id):
 @login_required
 @user_passes_test(is_club_admin)
 def admin_dashboard_view(request):
-    clubs = Club.objects.all()
+    clubs     = Club.objects.all()
     elections = Election.objects.all().order_by('start_date')
     
-    # Attach candidate data to each election as a JSON string.
     for election in elections:
         election.candidate_data = json.dumps([
             {
-                'username': candidate.user.username,
-                'full_name': candidate.user.get_full_name() or candidate.user.username,
+                'username':  c.user.username,
+                'full_name': c.user.get_full_name() or c.user.username,
             }
-            for candidate in election.candidates.all()
+            for c in election.candidates.all()
         ])
     
     # Build mapping for club candidates for use in candidate select dropdowns.
@@ -206,7 +205,7 @@ def create_election(request):
             description=description,
             start_date=start_date,
             end_date=end_date,
-            status=Election.STATUS_PENDING,
+            approval_status=Election.APPROVAL_PENDING,
             created_by=request.user
         )
         

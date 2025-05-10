@@ -24,56 +24,134 @@ class Membership(models.Model):
     def __str__(self):
         return f"{self.user.username} in {self.club.name}"
 
-# Election represents an election event hosted by a club.
+class ElectionQuerySet(models.QuerySet):
+    def live(self):
+        """
+        Returns only those elections that:
+          - have been approved by an admin, and
+          - whose start_date ≤ today ≤ end_date
+        """
+        today = timezone.now().date()
+        return self.filter(
+            approval_status=Election.APPROVAL_APPROVED,
+            start_date__lte=today,
+            end_date__gte=today,
+        )
+
 class Election(models.Model):
+    # — Admin approval choices —
+    APPROVAL_PENDING  = 'Pending'
+    APPROVAL_APPROVED = 'Approved'
+    APPROVAL_CHOICES = [
+        (APPROVAL_PENDING,  'Pending Approval'),
+        (APPROVAL_APPROVED, 'Approved'),
+    ]
+
+    # — Date-based status labels —
     STATUS_PENDING = 'Pending'
     STATUS_ONGOING = 'Ongoing'
-    STATUS_ENDED = 'Ended'
+    STATUS_ENDED   = 'Ended'
     STATUS_CHOICES = [
         (STATUS_PENDING, 'Pending'),
         (STATUS_ONGOING, 'Ongoing'),
-        (STATUS_ENDED, 'Ended'),
+        (STATUS_ENDED,   'Ended'),
     ]
-    
-    club = models.ForeignKey('Club', on_delete=models.CASCADE, related_name='elections')
-    name = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_elections')
-    # New field: candidates contesting in this election.
-    candidates = models.ManyToManyField('Candidate', related_name='elections', blank=True)
 
-    
+    club            = models.ForeignKey('Club', on_delete=models.CASCADE, related_name='elections')
+    name            = models.CharField(max_length=200)
+    description     = models.TextField(blank=True)
+    start_date      = models.DateField()
+    end_date        = models.DateField()
+
+    # This field is what your admins flip in Django Admin:
+    approval_status = models.CharField(
+        max_length=20,
+        choices=APPROVAL_CHOICES,
+        default=APPROVAL_PENDING,
+        help_text="Has an admin approved this election?"
+    )
+
+    created_by      = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_elections')
+    candidates      = models.ManyToManyField('Candidate', related_name='elections', blank=True)
+
+    # Swap in our custom manager
+    objects = ElectionQuerySet.as_manager()
+
     def __str__(self):
         return self.name
 
-    def vote_count(self):
-        """
-        Returns a queryset with vote counts per candidate for this election.
-        Example output: [{'candidate': 1, 'total': 5}, {'candidate': 2, 'total': 3}, ...]
-        """
-        return self.votes.values('candidate').annotate(total=Count('candidate')).order_by('-total')
-
-    def get_winner(self):
-        vote_counts = self.vote_count()
-        if vote_counts:
-            winner_candidate_id = vote_counts[0]['candidate']
-            try:
-                winner_candidate = self.candidates.get(id=winner_candidate_id)
-                full_name = winner_candidate.user.get_full_name()
-                return full_name if full_name else winner_candidate.user.username
-            except ObjectDoesNotExist:
-                # In a robust system, this should not happen if the election is ended.
-                return "Error: Winner not found"
-        # If there are no votes, you might choose to raise an error or handle it as needed.
-        return "No votes cast"
-    
     def clean(self):
         if self.start_date > self.end_date:
-            raise ValidationError("Start date must be before end date.")
+            raise ValidationError("Start date must be on or before end date.")
 
+    def vote_count(self):
+        return (
+            self.votes
+                .values('candidate')
+                .annotate(total=Count('candidate'))
+                .order_by('-total')
+        )
+
+    def get_winner(self):
+        vc = self.vote_count()
+        if not vc:
+            return "No votes cast"
+        winner_id = vc[0]['candidate']
+        try:
+            cand = self.candidates.get(id=winner_id)
+            return cand.user.get_full_name() or cand.user.username
+        except Candidate.DoesNotExist:
+            return "Error: Winner not found"
+
+    @property
+    def date_status(self):
+        """
+        Returns one of 'Pending', 'Ongoing', 'Ended'
+        based on (a) whether it's approved and (b) today's date.
+        """
+        today = timezone.now().date()
+
+        # Not approved → still pending
+        if self.approval_status != self.APPROVAL_APPROVED:
+            return self.STATUS_PENDING
+
+        # Approved but hasn't started
+        if today < self.start_date:
+            return self.STATUS_PENDING
+
+        # In its running window
+        if today <= self.end_date:
+            return self.STATUS_ONGOING
+
+        # Past end
+        return self.STATUS_ENDED
+
+    @property
+    def management_status(self):
+        """
+        Returns one of:
+          - "Pending Approval" – Submitted, waiting for an admin to OK it
+          - "Scheduled"        – Approved and on the calendar, but not yet started
+          - "In Progress"      – Between start_date and end_date
+          - "Closed"           – After the end date
+        """
+        today = timezone.now().date()
+
+        # 1) Submitted, awaiting admin approval
+        if self.approval_status == self.APPROVAL_PENDING:
+            return "Pending Approval"
+
+        # 2) Approved but hasn't started yet
+        if today < self.start_date:
+            return "Scheduled"
+
+        # 3) Ongoing window
+        if today <= self.end_date:
+            return "In Progress"
+
+        # 4) Past end
+        return "Closed"
+    
 
 
 # Candidate represents a candidate running in an election.
