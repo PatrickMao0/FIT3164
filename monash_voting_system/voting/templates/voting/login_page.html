@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,6 +16,7 @@
       --text-color: #555;
       --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+
     body {
       font-family: Arial, sans-serif;
       background-color: var(--background-color);
@@ -24,23 +26,27 @@
       flex-direction: column;
       min-height: 100vh;
     }
+
     header {
       background-color: var(--primary-color);
       padding: 20px;
       color: var(--white);
       text-align: left;
     }
+
     .logo {
       background-color: transparent;
       height: 50px;
       vertical-align: middle;
     }
+
     .header-title {
       display: inline-block;
       margin-left: 20px;
       font-size: 24px;
       vertical-align: middle;
     }
+
     footer {
       background-color: var(--primary-color);
       padding: 20px;
@@ -48,36 +54,43 @@
       color: var(--white);
       margin-top: 40px;
     }
+
     .footer-links {
       display: flex;
       justify-content: center;
       gap: 20px;
     }
+
     .footer-link {
       color: var(--white);
       text-decoration: none;
       font-size: 14px;
     }
+
     main {
       flex-grow: 1;
       padding: 20px;
       max-width: 1200px;
       margin: 0 auto;
     }
+
     .messages {
       margin-bottom: 20px;
     }
+
     .alert {
       padding: 10px;
       border-radius: 5px;
       margin-bottom: 10px;
       font-size: 14px;
     }
+
     .alert.error {
       background-color: #f8d7da;
       color: #842029;
       border: 1px solid #f5c2c7;
     }
+
     .btn {
       width: 100%;
       padding: 10px;
@@ -87,14 +100,17 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
+
     .btn.primary {
       background-color: var(--primary-color);
       color: var(--white);
     }
+
     .btn.primary:hover,
     .btn.primary:focus {
       background-color: #001e4a;
     }
+
     .admin-btn {
       margin-top: 10px;
       font-size: 14px;
@@ -104,15 +120,18 @@
       cursor: pointer;
       text-decoration: underline;
     }
+
     .form-group {
       margin-bottom: 20px;
       text-align: left;
     }
+
     label {
       display: block;
       font-weight: bold;
       margin-bottom: 5px;
     }
+
     input {
       width: 100%;
       padding: 10px;
@@ -120,6 +139,7 @@
       border: 1px solid #ccc;
       font-size: 16px;
     }
+
     .login-container {
       background-color: var(--white);
       padding: 40px;
@@ -130,21 +150,25 @@
       width: 100%;
       margin: auto;
     }
+
     .forgot-password-link {
       display: block;
       margin-top: 10px;
       font-size: 14px;
       color: var(--primary-color);
     }
+
     .register-link {
       margin-top: 20px;
       font-size: 14px;
     }
+
     .register-link a {
       color: var(--secondary-color);
     }
   </style>
 </head>
+
 <body>
   <!-- Header Section -->
   <header>
@@ -152,23 +176,23 @@
       <img src="{% static 'images/logo.png' %}" alt="Monash University Logo" class="logo">
     </div>
   </header>
-  
+
   <!-- Main Content Section -->
   <main>
     <section class="login-container">
       <h1>Monash University Clubs Voting System</h1>
-      
+
       <!-- Display error messages if any -->
       {% if messages %}
-        <div class="messages">
-          {% for message in messages %}
-            <div class="alert {{ message.tags }}">
-              {{ message }}
-            </div>
-          {% endfor %}
+      <div class="messages">
+        {% for message in messages %}
+        <div class="alert {{ message.tags }}">
+          {{ message }}
         </div>
+        {% endfor %}
+      </div>
       {% endif %}
-      
+
       <form action="/login/" method="POST">
         {% csrf_token %}
         <div class="form-group">
@@ -189,7 +213,7 @@
       </p>
     </section>
   </main>
-  
+
   <!-- Footer Section -->
   <footer>
     <div class="footer-links">
@@ -198,4 +222,5 @@
     </div>
   </footer>
 </body>
+
 </html>

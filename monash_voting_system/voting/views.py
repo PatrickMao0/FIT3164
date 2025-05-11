@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse, HttpResponseForbidden
-from .models import Election, Membership, Candidate, Vote, Club, UserProfile
+from .models import Election, Membership, Candidate, Vote, Club, UserProfile, CandidateForm
 from django.utils import timezone
 
 
@@ -134,13 +134,16 @@ def admin_dashboard_view(request):
             for candidate in candidates
         ]
     
+    all_candidates = Candidate.objects.select_related('club','user').all()
+    
     context = {
         'clubs': clubs,
         'elections': elections,
         'club_candidates_json': json.dumps(club_candidates),
+        'candidate_form': CandidateForm(),
+        'all_candidates':    all_candidates, 
     }
     return render(request, 'voting/admin_dashboard.html', context)
-
 
 @login_required
 @user_passes_test(is_club_admin)
@@ -223,9 +226,6 @@ def create_election(request):
     else:
         messages.error(request, "Invalid request.")
         return redirect('admin_dashboard')
-
-
-
 
 
 
@@ -422,6 +422,33 @@ def user_request(request):
         messages.success(request, "Your request has been sent to the site admins.")
     return redirect("admin_dashboard")
 
+
+@login_required
+@user_passes_test(is_club_admin)
+def add_candidate(request):
+    if request.method == 'POST':
+        form = CandidateForm(request.POST, request.FILES)
+        if form.is_valid():
+            cd = form.cleaned_data
+            # update existing or create new
+            candidate, created = Candidate.objects.update_or_create(
+                club=cd['club'],
+                user=cd['user'],
+                defaults={
+                    'bio':   cd['bio'],
+                    'photo': cd['photo'],
+                }
+            )
+            if created:
+                messages.success(request, f"Candidate {candidate.user.username} added!")
+            else:
+                messages.success(request, f"Candidate {candidate.user.username} updated!")
+        else:
+            # show form errors in dashboard
+            messages.error(request, "Error adding candidate: " +
+                                      "; ".join(f"{f}: {e}" for f,e_list in form.errors.items() for e in e_list))
+    # whether GET or POST, go back to dashboard
+    return redirect('admin_dashboard')
 
 
 

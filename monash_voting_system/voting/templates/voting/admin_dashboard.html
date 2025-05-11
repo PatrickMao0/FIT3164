@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +15,7 @@
       --text-color: #555;
       --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+
     /* Global Styles */
     body {
       font-family: Arial, sans-serif;
@@ -24,6 +26,7 @@
       flex-direction: column;
       min-height: 100vh;
     }
+
     /* Header */
     header {
       background-color: var(--primary-color);
@@ -31,17 +34,20 @@
       text-align: left;
       color: var(--white);
     }
+
     .logo {
       background-color: transparent;
       height: 50px;
       vertical-align: middle;
     }
+
     .header-title {
       display: inline-block;
       margin-left: 20px;
       font-size: 24px;
       vertical-align: middle;
     }
+
     /* Main Container */
     main {
       flex-grow: 1;
@@ -49,18 +55,21 @@
       max-width: 1200px;
       margin: 0 auto;
     }
+
     .title {
       font-size: 28px;
       margin-bottom: 30px;
       color: var(--primary-color);
       text-align: center;
     }
+
     .dashboard-grid {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
       max-width: 1200px;
     }
+
     .dashboard-section {
       background-color: var(--white);
       padding: 20px;
@@ -70,11 +79,13 @@
       flex: 1 1 100%;
       max-width: 100%;
     }
+
     .section-title {
       font-size: 20px;
       margin-bottom: 10px;
       color: var(--text-color);
     }
+
     .btn {
       padding: 10px 20px;
       border-radius: 5px;
@@ -83,32 +94,40 @@
       font-size: 16px;
       transition: background-color 0.3s ease;
     }
+
     .btn.primary {
       background-color: var(--primary-color);
       color: var(--white);
     }
+
     .btn.primary:hover,
     .btn.primary:focus {
       background-color: #001e4a;
     }
+
     .btn.grey {
       background-color: grey;
       color: var(--white);
       cursor: not-allowed;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
     }
-    table th, table td {
+
+    table th,
+    table td {
       padding: 10px;
       text-align: left;
       border: 1px solid #ccc;
     }
+
     table th {
       background-color: #f0f0f0;
     }
+
     /* Footer */
     footer {
       background-color: var(--primary-color);
@@ -117,19 +136,23 @@
       color: var(--white);
       margin-top: 40px;
     }
+
     .footer-links {
       display: flex;
       justify-content: center;
       gap: 20px;
     }
+
     .footer-link {
       color: var(--white);
       text-decoration: none;
       font-size: 14px;
     }
+
     /* Shared Modal Styles */
     .modal {
-      display: none; /* Hidden by default */
+      display: none;
+      /* Hidden by default */
       position: fixed;
       z-index: 200;
       left: 0;
@@ -137,8 +160,9 @@
       width: 100%;
       height: 100%;
       overflow: auto;
-      background-color: rgba(0,0,0,0.5);
+      background-color: rgba(0, 0, 0, 0.5);
     }
+
     .modal-content {
       background-color: var(--white);
       margin: 10% auto;
@@ -148,26 +172,32 @@
       max-width: 500px;
       box-shadow: var(--shadow);
     }
+
     .modal-header {
       font-size: 20px;
       margin-bottom: 10px;
       color: var(--primary-color);
     }
+
     .modal-body {
       margin-bottom: 10px;
     }
+
     .modal-footer {
       text-align: right;
     }
+
     .form-group {
       margin-bottom: 15px;
       text-align: left;
     }
+
     .form-group label {
       display: block;
       font-weight: bold;
       margin-bottom: 5px;
     }
+
     .form-group input,
     .form-group select,
     .form-group textarea {
@@ -176,12 +206,14 @@
       border: 1px solid #ccc;
       border-radius: 5px;
     }
+
     /* Candidate field styling */
     .candidate-field {
       display: flex;
       align-items: center;
       margin-bottom: 5px;
     }
+
     .candidate-field select {
       flex: 1;
       margin-right: 10px;
@@ -189,6 +221,7 @@
       border: 1px solid #ccc;
       border-radius: 5px;
     }
+
     .removeCandidateBtn {
       background-color: var(--secondary-color);
       color: var(--white);
@@ -197,25 +230,31 @@
       padding: 5px 10px;
       cursor: pointer;
     }
+
     .removeCandidateBtn:hover {
       background-color: #005089;
     }
+
     /* Styles for results table in the view results modal */
     #resultsTable {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
     }
-    #resultsTable th, #resultsTable td {
+
+    #resultsTable th,
+    #resultsTable td {
       border: 1px solid #ccc;
       padding: 8px;
       text-align: left;
     }
+
     #resultsTable th {
       background-color: #f0f0f0;
     }
   </style>
 </head>
+
 <body>
   <!-- Header Section -->
   <header>
@@ -226,19 +265,12 @@
       <span class="header-title">Admin Dashboard <br> - Monash University Voting</span>
     </div>
   </header>
-  
+
   <!-- Main Content Section -->
   <main>
-        {% if messages %}
-      <ul class="messages">
-        {% for msg in messages %}
-          <li class="{{ msg.tags }}">{{ msg }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-    
-    <h2 class="title">Manage Elections</h2>
     <div class="dashboard-grid">
+
+      <!-- Election Management -->
       <div class="dashboard-section">
         <h3 class="section-title">Election Management</h3>
         <p>View, edit, or create new elections</p>
@@ -263,28 +295,21 @@
               <td>
                 {# 1) Pending (submitted, waiting for approval) – still editable #}
                 {% if election.management_status == "Pending Approval" %}
-                  <button
-                    class="btn primary editElectionBtn"
-                    data-election-id="{{ election.id }}"
-                    data-name="{{ election.name }}"
-                    data-description="{{ election.description }}"
-                    data-candidates='{{ election.candidate_data|safe }}'
-                    data-start-date="{{ election.start_date|date:"Y-m-d" }}"
-                    data-end-date="{{ election.end_date|date:"Y-m-d" }}"
-                    data-club-id="{{ election.club.id }}"
-                    data-club-name="{{ election.club.name }}"
-                  >Edit</button>
+                <button class="btn primary editElectionBtn" data-election-id="{{ election.id }}"
+                  data-name="{{ election.name }}" data-description="{{ election.description }}"
+                  data-candidates='{{ election.candidate_data|safe }}' data-start-date="{{ election.start_date|date:"
+                  Y-m-d" }}" data-end-date="{{ election.end_date|date:" Y-m-d" }}" data-club-id="{{ election.club.id }}"
+                  data-club-name="{{ election.club.name }}">Edit</button>
 
                 {# 2) Approved (approved, waiting for start_date) – greyed out #}
                 {% elif election.management_status == "Scheduled" %}
-                  <button class="btn grey" disabled>Edit</button>
+                <button class="btn grey" disabled>Edit</button>
 
                 {# 3&4) Ongoing or Ended – show statistics #}
                 {% else %}
-                  <button
-                    class="btn primary"
-                    onclick="window.location.href='{{ request.scheme }}://{{ request.get_host }}{% url 'vote_stats' election.id %}';"
-                  >View Statistics</button>
+                <button class="btn primary"
+                  onclick="window.location.href='{{ request.scheme }}://{{ request.get_host }}{% url 'vote_stats' election.id %}';">View
+                  Statistics</button>
                 {% endif %}
               </td>
             </tr>
@@ -296,76 +321,22 @@
           </tbody>
         </table>
       </div>
-      
-      
+
+
       <div class="dashboard-section">
-        <h3 class="section-title">Security &amp; User Management</h3>
+
+        <h3 class="section-title">Candidate Management</h3>
+        <!-- Trigger button -->
+        <button class="btn primary" id="openAddCandidate">Add Candidate</button>        
         
+        <h3 class="section-title">Security &amp; User Management</h3>
         <!-- Trigger button -->
         <button class="btn primary" id="openUserRequest">Request User Change</button>
 
-        <!-- User Request Modal -->
-        <div id="userRequestModal" class="modal">
-          <div class="modal-content">
-            <div class="modal-header">Request User Change</div>
-            <form id="userRequestForm" method="POST" action="{% url 'user_request' %}">
-              {% csrf_token %}
-              <div class="modal-body">
-                <div class="form-group">
-                  <label for="reqUsername">Username or Email</label>
-                  <input type="text" id="reqUsername" name="username" required>
-                </div>
-
-
-                <!-- Actions -->
-                <div class="form-group">
-                  <label for="reqAction">Action</label>
-                  <select id="reqAction" name="action" required>
-                    <option value="">Select…</option>
-                    <option value="promote_to_admin">Promote to Admin</option>
-                    <option value="revoke_admin_access">Revoke Admin Access</option>
-                    <option value="request_user_removal">Request User Removal</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <!-- Reasons -->
-                <div class="form-group">
-                  <label for="reqReasonCode">Reason</label>
-                  <select id="reqReasonCode" name="reason_code" required>
-                    <option value="">Select a reason…</option>
-                    <option value="admin_team_join">Admin Team Join</option>
-                    <option value="admin_team_leave">Admin Team Leave</option>
-                    <option value="policy_violation">Policy Violation or Misconduct</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <!-- Details always required -->
-                <div class="form-group">
-                  <label for="reqReasonText">Details </label>
-                  <textarea
-                    id="reqReasonText"
-                    name="reason"
-                    rows="3"
-                    placeholder="Please explain why..."
-                    required
-                  ></textarea>
-                </div>
-
-                  <!-- Footer with Submit & Cancel -->
-                  <div class="modal-footer">
-                    <button type="submit" class="btn primary">Submit Request</button>
-                    <button type="button" id="closeUserRequest" class="btn secondary">Cancel</button>
-                  </div>
-
-            </form>
-          </div>
-        </div>
       </div>
     </div>
   </main>
-  
+
   <!-- Footer Section -->
   <footer>
     <div class="footer-links">
@@ -373,7 +344,7 @@
       <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
     </div>
   </footer>
-  
+
   <!-- Modal for Creating New Election -->
   <div id="createElectionModal" class="modal">
     <div class="modal-content">
@@ -387,7 +358,7 @@
             <select id="clubName" name="clubName" required>
               <option value="">Select a club...</option>
               {% for club in clubs %}
-                <option value="{{ club.id }}">{{ club.name }}</option>
+              <option value="{{ club.id }}">{{ club.name }}</option>
               {% endfor %}
             </select>
           </div>
@@ -410,7 +381,8 @@
               </select>
             </div>
           </div>
-          <button type="button" id="addCandidateBtn" class="btn primary" style="margin-bottom: 15px;">Add Candidate</button>
+          <button type="button" id="addCandidateBtn" class="btn primary" style="margin-bottom: 15px;">Add
+            Candidate</button>
           <!-- Start and End Dates -->
           <div class="form-group">
             <label for="startDate">Start Date:</label>
@@ -428,7 +400,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- Modal for Editing Election -->
   <div id="editElectionModal" class="modal">
     <div class="modal-content">
@@ -459,7 +431,8 @@
             <label>Candidate Names:</label>
             <!-- Candidate select fields will be populated dynamically -->
           </div>
-          <button type="button" id="editAddCandidateBtn" class="btn primary" style="margin-bottom: 15px;">Add Candidate</button>
+          <button type="button" id="editAddCandidateBtn" class="btn primary" style="margin-bottom: 15px;">Add
+            Candidate</button>
           <!-- Start and End Dates -->
           <div class="form-group">
             <label for="editStartDate">Start Date:</label>
@@ -477,7 +450,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- Modal for Viewing Results -->
   <div id="viewResultsModal" class="modal">
     <div class="modal-content">
@@ -501,309 +474,397 @@
       </div>
     </div>
   </div>
-  
-  <!-- JavaScript for Modal Behavior, Candidate Fields & Select Update -->
-  <script>
-    // clubCandidates is passed from the view as JSON.
-    var clubCandidates = JSON.parse('{{ club_candidates_json|escapejs }}');
 
-  
-    // Rebuild candidate selects for the Create modal.
-    function rebuildCandidateSelects() {
-      var clubSelect = document.getElementById('clubName');
-      var selectedClubId = clubSelect.value;
-      var candidateData = clubCandidates[selectedClubId] || [];
-      var selects = document.querySelectorAll('.candidate-select');
-      selects.forEach(function(select) {
-        var currentValue = select.value;
-        select.innerHTML = "";
-        var emptyOption = document.createElement('option');
-        emptyOption.value = "";
-        emptyOption.text = "";
-        select.appendChild(emptyOption);
-        candidateData.forEach(function(candidate) {
-          var option = document.createElement('option');
-          option.value = candidate.username;
-          option.text = candidate.full_name + " (" + candidate.username + ")";
-          select.appendChild(option);
-        });
-        if (currentValue && select.querySelector('option[value="' + currentValue + '"]')) {
-          select.value = currentValue;
-        } else {
-          select.value = "";
-        }
-      });
-      updateDisabledOptions();
-    }
-  
-    // Update function to disable duplicate candidate selections.
-    function updateDisabledOptions() {
-      var candidateSelects = Array.from(document.querySelectorAll('.candidate-select'));
-      let selectedValues = candidateSelects.map(function(select) {
-        return select.value;
-      }).filter(function(val) { return val !== ""; });
-      
-      candidateSelects.forEach(function(select) {
-        Array.from(select.options).forEach(function(option) {
-          if (option.value === "") {
-            option.disabled = false;
-          } else if (select.value !== option.value && selectedValues.includes(option.value)) {
-            option.disabled = true;
-          } else {
-            option.disabled = false;
-          }
-        });
-      });
-    }
-  
-    document.getElementById('clubName').addEventListener('change', rebuildCandidateSelects);
-  
-    // Helper function to create a candidate field using club-specific candidate options for the Edit modal.
-    function createCandidateFieldWithClub(containerSelector, candidateList) {
-      const candidateDiv = document.createElement('div');
-      candidateDiv.classList.add('candidate-field');
-      
-      const select = document.createElement('select');
-      select.name = 'candidateNames[]';
-      select.required = true;
-      select.classList.add('candidate-select');
-      
-      // Create an empty option.
-      const emptyOption = document.createElement('option');
-      emptyOption.value = "";
-      emptyOption.text = "";
-      select.appendChild(emptyOption);
-      
-      // Populate the select with candidates from the club.
-      candidateList.forEach(function(candidate) {
-        const option = document.createElement('option');
-        option.value = candidate.username;
-        option.text = candidate.full_name + " (" + candidate.username + ")";
-        select.appendChild(option);
-      });
-      
-      // When the select changes, update disabled options.
-      select.addEventListener('change', updateDisabledOptions);
-      
-      // Create a "Remove" button for this candidate field.
-      const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.classList.add('removeCandidateBtn');
-      removeBtn.textContent = 'Remove';
-      removeBtn.addEventListener('click', function() {
-        const container = document.querySelector(containerSelector);
-        const candidateFields = container.querySelectorAll('.candidate-field');
-        if (candidateFields.length > 1) {
-          candidateDiv.remove();
-          updateDisabledOptions();
-        } else {
-          alert("At least one candidate is required.");
-        }
-      });
-      
-      candidateDiv.appendChild(select);
-      candidateDiv.appendChild(removeBtn);
-      return candidateDiv;
-    }
-  
-    // Helper function to create a candidate field (for the Create modal) using existing logic.
-    function createCandidateField(containerSelector) {
-      const candidateDiv = document.createElement('div');
-      candidateDiv.classList.add('candidate-field');
-      
-      const select = document.createElement('select');
-      select.name = 'candidateNames[]';
-      select.required = true;
-      select.classList.add('candidate-select');
-      let clubSelect = document.getElementById('clubName');
-      let selectedClubId = clubSelect.value;
-      let candidateData = clubCandidates[selectedClubId] || [];
-      let emptyOption = document.createElement('option');
-      emptyOption.value = "";
-      emptyOption.text = "";
-      select.appendChild(emptyOption);
-      candidateData.forEach(function(candidate) {
-        let option = document.createElement('option');
-        option.value = candidate.username;
-        option.text = candidate.full_name + " (" + candidate.username + ")";
-        select.appendChild(option);
-      });
-      select.addEventListener('change', updateDisabledOptions);
-      
-      const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.classList.add('removeCandidateBtn');
-      removeBtn.textContent = 'Remove';
-      removeBtn.addEventListener('click', function() {
-        const container = document.querySelector(containerSelector);
-        const candidateFields = container.querySelectorAll('.candidate-field');
-        if (candidateFields.length > 1) {
-          candidateDiv.remove();
-          updateDisabledOptions();
-        } else {
-          alert("At least one candidate is required.");
-        }
-      });
-      
-      candidateDiv.appendChild(select);
-      candidateDiv.appendChild(removeBtn);
-      return candidateDiv;
-    }
-    
-    // Reset candidate fields for a given container.
-    function resetCandidateFields(containerSelector) {
-      const container = document.querySelector(containerSelector);
-      container.innerHTML = '<label>Candidate Names:</label>';
-      container.appendChild(createCandidateField(containerSelector));
-    }
-    
-    // Create Election Modal Logic
-    document.getElementById('openCreateElection').addEventListener('click', function() {
-      document.getElementById('createElectionModal').style.display = 'block';
-      resetCandidateFields('#candidatesContainer');
-      rebuildCandidateSelects();
-    });
-    
-    function closeCreateModal() {
-      document.getElementById('createElectionModal').style.display = 'none';
-      document.getElementById('createElectionForm').reset();
-      resetCandidateFields('#candidatesContainer');
-    }
-    
-    document.getElementById('closeCreateModal').addEventListener('click', closeCreateModal);
-    window.addEventListener('click', function(event) {
-      const modal = document.getElementById('createElectionModal');
-      if (event.target === modal) {
-        closeCreateModal();
-      }
-    });
-    
-    document.getElementById('addCandidateBtn').addEventListener('click', function() {
-      const container = document.getElementById('candidatesContainer');
-      container.appendChild(createCandidateField('#candidatesContainer'));
-      updateDisabledOptions();
-    });
-    
-    // Global variable to hold current club id for editing.
-    let currentEditingClubId = null;
-    
-    // Edit Election Modal Logic
-    document.querySelectorAll('.editElectionBtn').forEach(function(button) {
-      button.addEventListener('click', function() {
-        // Retrieve election details from the button’s data attributes.
-        const electionId = this.getAttribute('data-election-id');
-        const electionName = this.getAttribute('data-name');
-        const electionDescription = this.getAttribute('data-description');
-        const clubId = this.getAttribute('data-club-id');
-        const clubName = this.getAttribute('data-club-name');
-        currentEditingClubId = clubId;
-        
-        let existingCandidates = [];
-        try {
-          existingCandidates = JSON.parse(this.getAttribute('data-candidates') || '[]');
-          console.log("Existing candidates:", existingCandidates);
-        } catch (e) {
-          console.error("Failed to parse candidate data:", e);
-        }
-        const startDate = this.getAttribute('data-start-date');
-        const endDate = this.getAttribute('data-end-date');
-  
-        // Populate form fields.
-        document.getElementById('editElectionId').value = electionId;
-        document.getElementById('editElectionName').value = electionName;
-        document.getElementById('editElectionDescription').value = electionDescription;
-        document.getElementById('editStartDate').value = startDate;
-        document.getElementById('editEndDate').value = endDate;
-        
-        // Set the club display and hidden input.
-        document.getElementById('editClubDisplay').innerText = clubName;
-        document.getElementById('editClubName').value = clubId;
-        
-        // Retrieve candidate list for this club.
-        let clubCandidateList = clubCandidates[clubId] || [];
-        console.log("Club candidate list:", clubCandidateList);
-        
-        // Clear the candidate container.
-        const editCandidatesContainer = document.getElementById('editCandidatesContainer');
-        editCandidatesContainer.innerHTML = '<label>Candidate Names:</label>';
-        
-        // Loop through existingCandidates and create a candidate field for each.
-        if (existingCandidates.length > 0) {
-          existingCandidates.forEach(function(candidate) {
-            const field = createCandidateFieldWithClub('#editCandidatesContainer', clubCandidateList);
-            editCandidatesContainer.appendChild(field);
-            if (typeof candidate === 'object' && candidate.username) {
-              field.querySelector('select').value = candidate.username;
-            } else {
-              field.querySelector('select').value = candidate;
+  <!-- Add Candidate Modal -->
+  <div id="addCandidateModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Add Candidate</div>
+      <form id="addCandidateForm" method="POST" action="{% url 'add_candidate' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body">
+          {{ candidate_form.as_p }}
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn primary">Add</button>
+          <button type="button" id="closeAddCandidate" class="btn secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- User Request Modal -->
+  <div id="userRequestModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Request User Change</div>
+      <form id="userRequestForm" method="POST" action="{% url 'user_request' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="reqUsername">Username or Email</label>
+            <input type="text" id="reqUsername" name="username" required>
+          </div>
+
+
+          <!-- Actions -->
+          <div class="form-group">
+            <label for="reqAction">Action</label>
+            <select id="reqAction" name="action" required>
+              <option value="">Select…</option>
+              <option value="promote_to_admin">Promote to Admin</option>
+              <option value="revoke_admin_access">Revoke Admin Access</option>
+              <option value="request_user_removal">Request User Removal</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <!-- Reasons -->
+          <div class="form-group">
+            <label for="reqReasonCode">Reason</label>
+            <select id="reqReasonCode" name="reason_code" required>
+              <option value="">Select a reason…</option>
+              <option value="admin_team_join">Admin Team Join</option>
+              <option value="admin_team_leave">Admin Team Leave</option>
+              <option value="policy_violation">Policy Violation or Misconduct</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <!-- Details always required -->
+          <div class="form-group">
+            <label for="reqReasonText">Details </label>
+            <textarea id="reqReasonText" name="reason" rows="3" placeholder="Please explain why..." required></textarea>
+          </div>
+
+          <!-- Footer with Submit & Cancel -->
+          <div class="modal-footer">
+            <button type="submit" class="btn primary">Submit Request</button>
+            <button type="button" id="closeUserRequest" class="btn secondary">Cancel</button>
+          </div>
+
+
+
+          <!-- JavaScript for Modal Behavior, Candidate Fields & Select Update -->
+          <script>
+            // clubCandidates is passed from the view as JSON.
+            var clubCandidates = JSON.parse('{{ club_candidates_json|escapejs }}');
+
+
+            // Rebuild candidate selects for the Create modal.
+            function rebuildCandidateSelects() {
+              var clubSelect = document.getElementById('clubName');
+              var selectedClubId = clubSelect.value;
+              var candidateData = clubCandidates[selectedClubId] || [];
+              var selects = document.querySelectorAll('.candidate-select');
+              selects.forEach(function (select) {
+                var currentValue = select.value;
+                select.innerHTML = "";
+                var emptyOption = document.createElement('option');
+                emptyOption.value = "";
+                emptyOption.text = "";
+                select.appendChild(emptyOption);
+                candidateData.forEach(function (candidate) {
+                  var option = document.createElement('option');
+                  option.value = candidate.username;
+                  option.text = candidate.full_name + " (" + candidate.username + ")";
+                  select.appendChild(option);
+                });
+                if (currentValue && select.querySelector('option[value="' + currentValue + '"]')) {
+                  select.value = currentValue;
+                } else {
+                  select.value = "";
+                }
+              });
+              updateDisabledOptions();
             }
-            console.log("Set candidate field value to:", field.querySelector('select').value);
-          });
-        } else {
-          // If no candidates exist, create one empty candidate field.
-          editCandidatesContainer.appendChild(createCandidateFieldWithClub('#editCandidatesContainer', clubCandidateList));
-        }
-        
-        updateDisabledOptions();
-        
-        // Display the edit modal.
-        document.getElementById('editElectionModal').style.display = 'block';
-      });
-    });
-    
-    // "Add Candidate" button functionality in the edit modal.
-    document.getElementById('editAddCandidateBtn').addEventListener('click', function() {
-      if (!currentEditingClubId) {
-        alert("Club information is missing.");
-        return;
-      }
-      let clubCandidateList = clubCandidates[currentEditingClubId] || [];
-      const container = document.getElementById('editCandidatesContainer');
-      container.appendChild(createCandidateFieldWithClub('#editCandidatesContainer', clubCandidateList));
-      updateDisabledOptions();
-    });
-    
-    function closeEditModal() {
-      document.getElementById('editElectionModal').style.display = 'none';
-      document.getElementById('editElectionForm').reset();
-      resetCandidateFields('#editCandidatesContainer');
-    }
-    
-    document.getElementById('closeEditModal').addEventListener('click', closeEditModal);
-    window.addEventListener('click', function(event) {
-      const modal = document.getElementById('editElectionModal');
-      if (event.target === modal) {
-        closeEditModal();
-      }
-    });
-    
 
-    // Show/hide the modal
-    document.getElementById('openUserRequest').onclick = () =>
-      document.getElementById('userRequestModal').style.display = 'block';
-    document.getElementById('closeUserRequest').onclick = () =>
-      document.getElementById('userRequestModal').style.display = 'none';
+            // Update function to disable duplicate candidate selections.
+            function updateDisabledOptions() {
+              var candidateSelects = Array.from(document.querySelectorAll('.candidate-select'));
+              let selectedValues = candidateSelects.map(function (select) {
+                return select.value;
+              }).filter(function (val) { return val !== ""; });
 
-    // Toggle “Other” reason field
-    document.getElementById('reqReasonCode').addEventListener('change', function() {
-      const other = document.getElementById('otherReasonGroup');
-      if (this.value === 'other') {
-        other.style.display = 'block';
-        other.querySelector('input').required = true;
-      } else {
-        other.style.display = 'none';
-        other.querySelector('input').required = false;
-      }
-    });
+              candidateSelects.forEach(function (select) {
+                Array.from(select.options).forEach(function (option) {
+                  if (option.value === "") {
+                    option.disabled = false;
+                  } else if (select.value !== option.value && selectedValues.includes(option.value)) {
+                    option.disabled = true;
+                  } else {
+                    option.disabled = false;
+                  }
+                });
+              });
+            }
 
-    // Close if you click outside the modal
-    window.addEventListener('click', e => {
-      const modal = document.getElementById('userRequestModal');
-      if (e.target === modal) modal.style.display = 'none';
-    });
+            document.getElementById('clubName').addEventListener('change', rebuildCandidateSelects);
 
-    // Initialize candidate selects on page load.
-    rebuildCandidateSelects();
-  </script>
+            // Helper function to create a candidate field using club-specific candidate options for the Edit modal.
+            function createCandidateFieldWithClub(containerSelector, candidateList) {
+              const candidateDiv = document.createElement('div');
+              candidateDiv.classList.add('candidate-field');
+
+              const select = document.createElement('select');
+              select.name = 'candidateNames[]';
+              select.required = true;
+              select.classList.add('candidate-select');
+
+              // Create an empty option.
+              const emptyOption = document.createElement('option');
+              emptyOption.value = "";
+              emptyOption.text = "";
+              select.appendChild(emptyOption);
+
+              // Populate the select with candidates from the club.
+              candidateList.forEach(function (candidate) {
+                const option = document.createElement('option');
+                option.value = candidate.username;
+                option.text = candidate.full_name + " (" + candidate.username + ")";
+                select.appendChild(option);
+              });
+
+              // When the select changes, update disabled options.
+              select.addEventListener('change', updateDisabledOptions);
+
+              // Create a "Remove" button for this candidate field.
+              const removeBtn = document.createElement('button');
+              removeBtn.type = 'button';
+              removeBtn.classList.add('removeCandidateBtn');
+              removeBtn.textContent = 'Remove';
+              removeBtn.addEventListener('click', function () {
+                const container = document.querySelector(containerSelector);
+                const candidateFields = container.querySelectorAll('.candidate-field');
+                if (candidateFields.length > 1) {
+                  candidateDiv.remove();
+                  updateDisabledOptions();
+                } else {
+                  alert("At least one candidate is required.");
+                }
+              });
+
+              candidateDiv.appendChild(select);
+              candidateDiv.appendChild(removeBtn);
+              return candidateDiv;
+            }
+
+            // Helper function to create a candidate field (for the Create modal) using existing logic.
+            function createCandidateField(containerSelector) {
+              const candidateDiv = document.createElement('div');
+              candidateDiv.classList.add('candidate-field');
+
+              const select = document.createElement('select');
+              select.name = 'candidateNames[]';
+              select.required = true;
+              select.classList.add('candidate-select');
+              let clubSelect = document.getElementById('clubName');
+              let selectedClubId = clubSelect.value;
+              let candidateData = clubCandidates[selectedClubId] || [];
+              let emptyOption = document.createElement('option');
+              emptyOption.value = "";
+              emptyOption.text = "";
+              select.appendChild(emptyOption);
+              candidateData.forEach(function (candidate) {
+                let option = document.createElement('option');
+                option.value = candidate.username;
+                option.text = candidate.full_name + " (" + candidate.username + ")";
+                select.appendChild(option);
+              });
+              select.addEventListener('change', updateDisabledOptions);
+
+              const removeBtn = document.createElement('button');
+              removeBtn.type = 'button';
+              removeBtn.classList.add('removeCandidateBtn');
+              removeBtn.textContent = 'Remove';
+              removeBtn.addEventListener('click', function () {
+                const container = document.querySelector(containerSelector);
+                const candidateFields = container.querySelectorAll('.candidate-field');
+                if (candidateFields.length > 1) {
+                  candidateDiv.remove();
+                  updateDisabledOptions();
+                } else {
+                  alert("At least one candidate is required.");
+                }
+              });
+
+              candidateDiv.appendChild(select);
+              candidateDiv.appendChild(removeBtn);
+              return candidateDiv;
+            }
+
+            // Reset candidate fields for a given container.
+            function resetCandidateFields(containerSelector) {
+              const container = document.querySelector(containerSelector);
+              container.innerHTML = '<label>Candidate Names:</label>';
+              container.appendChild(createCandidateField(containerSelector));
+            }
+
+            // Create Election Modal Logic
+            document.getElementById('openCreateElection').addEventListener('click', function () {
+              document.getElementById('createElectionModal').style.display = 'block';
+              resetCandidateFields('#candidatesContainer');
+              rebuildCandidateSelects();
+            });
+
+            function closeCreateModal() {
+              document.getElementById('createElectionModal').style.display = 'none';
+              document.getElementById('createElectionForm').reset();
+              resetCandidateFields('#candidatesContainer');
+            }
+
+            document.getElementById('closeCreateModal').addEventListener('click', closeCreateModal);
+            window.addEventListener('click', function (event) {
+              const modal = document.getElementById('createElectionModal');
+              if (event.target === modal) {
+                closeCreateModal();
+              }
+            });
+
+            document.getElementById('addCandidateBtn').addEventListener('click', function () {
+              const container = document.getElementById('candidatesContainer');
+              container.appendChild(createCandidateField('#candidatesContainer'));
+              updateDisabledOptions();
+            });
+
+            // Global variable to hold current club id for editing.
+            let currentEditingClubId = null;
+
+            // Edit Election Modal Logic
+            document.querySelectorAll('.editElectionBtn').forEach(function (button) {
+              button.addEventListener('click', function () {
+                // Retrieve election details from the button’s data attributes.
+                const electionId = this.getAttribute('data-election-id');
+                const electionName = this.getAttribute('data-name');
+                const electionDescription = this.getAttribute('data-description');
+                const clubId = this.getAttribute('data-club-id');
+                const clubName = this.getAttribute('data-club-name');
+                currentEditingClubId = clubId;
+
+                let existingCandidates = [];
+                try {
+                  existingCandidates = JSON.parse(this.getAttribute('data-candidates') || '[]');
+                  console.log("Existing candidates:", existingCandidates);
+                } catch (e) {
+                  console.error("Failed to parse candidate data:", e);
+                }
+                const startDate = this.getAttribute('data-start-date');
+                const endDate = this.getAttribute('data-end-date');
+
+                // Populate form fields.
+                document.getElementById('editElectionId').value = electionId;
+                document.getElementById('editElectionName').value = electionName;
+                document.getElementById('editElectionDescription').value = electionDescription;
+                document.getElementById('editStartDate').value = startDate;
+                document.getElementById('editEndDate').value = endDate;
+
+                // Set the club display and hidden input.
+                document.getElementById('editClubDisplay').innerText = clubName;
+                document.getElementById('editClubName').value = clubId;
+
+                // Retrieve candidate list for this club.
+                let clubCandidateList = clubCandidates[clubId] || [];
+                console.log("Club candidate list:", clubCandidateList);
+
+                // Clear the candidate container.
+                const editCandidatesContainer = document.getElementById('editCandidatesContainer');
+                editCandidatesContainer.innerHTML = '<label>Candidate Names:</label>';
+
+                // Loop through existingCandidates and create a candidate field for each.
+                if (existingCandidates.length > 0) {
+                  existingCandidates.forEach(function (candidate) {
+                    const field = createCandidateFieldWithClub('#editCandidatesContainer', clubCandidateList);
+                    editCandidatesContainer.appendChild(field);
+                    if (typeof candidate === 'object' && candidate.username) {
+                      field.querySelector('select').value = candidate.username;
+                    } else {
+                      field.querySelector('select').value = candidate;
+                    }
+                    console.log("Set candidate field value to:", field.querySelector('select').value);
+                  });
+                } else {
+                  // If no candidates exist, create one empty candidate field.
+                  editCandidatesContainer.appendChild(createCandidateFieldWithClub('#editCandidatesContainer', clubCandidateList));
+                }
+
+                updateDisabledOptions();
+
+                // Display the edit modal.
+                document.getElementById('editElectionModal').style.display = 'block';
+              });
+            });
+
+            // "Add Candidate" button functionality in the edit modal.
+            document.getElementById('editAddCandidateBtn').addEventListener('click', function () {
+              if (!currentEditingClubId) {
+                alert("Club information is missing.");
+                return;
+              }
+              let clubCandidateList = clubCandidates[currentEditingClubId] || [];
+              const container = document.getElementById('editCandidatesContainer');
+              container.appendChild(createCandidateFieldWithClub('#editCandidatesContainer', clubCandidateList));
+              updateDisabledOptions();
+            });
+
+            function closeEditModal() {
+              document.getElementById('editElectionModal').style.display = 'none';
+              document.getElementById('editElectionForm').reset();
+              resetCandidateFields('#editCandidatesContainer');
+            }
+
+            document.getElementById('closeEditModal').addEventListener('click', closeEditModal);
+            window.addEventListener('click', function (event) {
+              const modal = document.getElementById('editElectionModal');
+              if (event.target === modal) {
+                closeEditModal();
+              }
+            });
+
+
+            // Show/hide the modal
+            document.getElementById('openUserRequest').onclick = () =>
+              document.getElementById('userRequestModal').style.display = 'block';
+            document.getElementById('closeUserRequest').onclick = () =>
+              document.getElementById('userRequestModal').style.display = 'none';
+
+            // Toggle “Other” reason field
+            document.getElementById('reqReasonCode').addEventListener('change', function () {
+              const other = document.getElementById('otherReasonGroup');
+              if (this.value === 'other') {
+                other.style.display = 'block';
+                other.querySelector('input').required = true;
+              } else {
+                other.style.display = 'none';
+                other.querySelector('input').required = false;
+              }
+            });
+
+            // Close if you click outside the modal
+            window.addEventListener('click', e => {
+              const modal = document.getElementById('userRequestModal');
+              if (e.target === modal) modal.style.display = 'none';
+            });
+
+            // Initialize candidate selects on page load.
+            rebuildCandidateSelects();
+
+
+
+            // Show Add-Candidate modal
+            document.getElementById('openAddCandidate').onclick = () =>
+              document.getElementById('addCandidateModal').style.display = 'block';
+
+            // Close it
+            document.getElementById('closeAddCandidate').onclick = () =>
+              document.getElementById('addCandidateModal').style.display = 'none';
+
+            // Click outside to close
+            window.addEventListener('click', e => {
+              const modal = document.getElementById('addCandidateModal');
+              if (e.target === modal) modal.style.display = 'none';
+            });
+            
+
+          </script>
 </body>
+
 </html>

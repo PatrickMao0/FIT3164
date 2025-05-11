@@ -3,6 +3,7 @@ from django.db import models
 from django.utils import timezone
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django import forms
 
 # Club represents a university club.
 class Club(models.Model):
@@ -167,6 +168,19 @@ class Candidate(models.Model):
         
     def __str__(self):
         return self.user.username
+
+
+class CandidateForm(forms.ModelForm):
+    class Meta:
+        model  = Candidate
+        fields = ['club', 'user']
+        widgets = {
+            'bio': forms.Textarea(attrs={'rows': 3}),
+        }
+
+
+
+
 
 # Vote represents a vote cast for a candidate in an election.
 class Vote(models.Model):
