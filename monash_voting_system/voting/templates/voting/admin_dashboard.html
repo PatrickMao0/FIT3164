@@ -229,6 +229,14 @@
   
   <!-- Main Content Section -->
   <main>
+        {% if messages %}
+      <ul class="messages">
+        {% for msg in messages %}
+          <li class="{{ msg.tags }}">{{ msg }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    
     <h2 class="title">Manage Elections</h2>
     <div class="dashboard-grid">
       <div class="dashboard-section">
@@ -292,7 +300,68 @@
       
       <div class="dashboard-section">
         <h3 class="section-title">Security &amp; User Management</h3>
-        <button class="btn primary">Add/Remove Users</button>
+        
+        <!-- Trigger button -->
+        <button class="btn primary" id="openUserRequest">Request User Change</button>
+
+        <!-- User Request Modal -->
+        <div id="userRequestModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">Request User Change</div>
+            <form id="userRequestForm" method="POST" action="{% url 'user_request' %}">
+              {% csrf_token %}
+              <div class="modal-body">
+                <div class="form-group">
+                  <label for="reqUsername">Username or Email</label>
+                  <input type="text" id="reqUsername" name="username" required>
+                </div>
+
+
+                <!-- Actions -->
+                <div class="form-group">
+                  <label for="reqAction">Action</label>
+                  <select id="reqAction" name="action" required>
+                    <option value="">Select…</option>
+                    <option value="promote_to_admin">Promote to Admin</option>
+                    <option value="revoke_admin_access">Revoke Admin Access</option>
+                    <option value="request_user_removal">Request User Removal</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <!-- Reasons -->
+                <div class="form-group">
+                  <label for="reqReasonCode">Reason</label>
+                  <select id="reqReasonCode" name="reason_code" required>
+                    <option value="">Select a reason…</option>
+                    <option value="admin_team_join">Admin Team Join</option>
+                    <option value="admin_team_leave">Admin Team Leave</option>
+                    <option value="policy_violation">Policy Violation or Misconduct</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <!-- Details always required -->
+                <div class="form-group">
+                  <label for="reqReasonText">Details </label>
+                  <textarea
+                    id="reqReasonText"
+                    name="reason"
+                    rows="3"
+                    placeholder="Please explain why..."
+                    required
+                  ></textarea>
+                </div>
+
+                  <!-- Footer with Submit & Cancel -->
+                  <div class="modal-footer">
+                    <button type="submit" class="btn primary">Submit Request</button>
+                    <button type="button" id="closeUserRequest" class="btn secondary">Cancel</button>
+                  </div>
+
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -708,6 +777,31 @@
       }
     });
     
+
+    // Show/hide the modal
+    document.getElementById('openUserRequest').onclick = () =>
+      document.getElementById('userRequestModal').style.display = 'block';
+    document.getElementById('closeUserRequest').onclick = () =>
+      document.getElementById('userRequestModal').style.display = 'none';
+
+    // Toggle “Other” reason field
+    document.getElementById('reqReasonCode').addEventListener('change', function() {
+      const other = document.getElementById('otherReasonGroup');
+      if (this.value === 'other') {
+        other.style.display = 'block';
+        other.querySelector('input').required = true;
+      } else {
+        other.style.display = 'none';
+        other.querySelector('input').required = false;
+      }
+    });
+
+    // Close if you click outside the modal
+    window.addEventListener('click', e => {
+      const modal = document.getElementById('userRequestModal');
+      if (e.target === modal) modal.style.display = 'none';
+    });
+
     // Initialize candidate selects on page load.
     rebuildCandidateSelects();
   </script>

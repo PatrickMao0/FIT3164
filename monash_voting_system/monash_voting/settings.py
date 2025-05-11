@@ -88,7 +88,7 @@ DATABASES = {
     }
 }
 
-
+# Remove to use simple password for demo
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -107,7 +107,7 @@ DATABASES = {
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Australia/Melbourne"
 
 USE_I18N = True
 
@@ -125,3 +125,16 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Who gets the mail_admins() notifications
+ADMINS = [
+    ("Admin", "admin@staff.monash.edu"),
+]
+
+# What “From:” address to use for those emails
+SERVER_EMAIL = "no-reply@mvs.monash.edu"
+
+
+# Send all emails to the console for development/demo
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

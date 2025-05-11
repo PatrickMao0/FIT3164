@@ -11,7 +11,7 @@ import json
 from datetime import datetime
 from django.db.models import Count, F, Value, CharField
 from django.db.models.functions import Concat, Coalesce,TruncHour
-
+from django.core.mail import mail_admins
 
 def login_view(request):
     if request.method == "POST":
@@ -401,6 +401,26 @@ def vote_stats_view(request, election_id):
 
 
 
+@login_required
+@user_passes_test(is_club_admin)
+def user_request(request):
+    if request.method == "POST":
+        username   = request.POST["username"]
+        action     = request.POST["action"]
+        reason_code= request.POST["reason_code"]
+        reason     = request.POST.get("reason","")
+        # build a message or create a model record here…
+        subject = f"[User Request] {action.title()} {username}"
+        body = (
+            f"Requested by {request.user.username}\n\n"
+            f"Action: {action}\n"
+            f"Username/Email: {username}\n"
+            f"Reason Code: {reason_code}\n"
+            f"Additional Info: {reason}"
+        )
+        mail_admins(subject, body)
+        messages.success(request, "Your request has been sent to the site admins.")
+    return redirect("admin_dashboard")
 
 
 
