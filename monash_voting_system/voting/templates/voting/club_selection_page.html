@@ -377,6 +377,18 @@
         closeBtn.addEventListener('click', closeModal);
       }
     });
+
+
+    // ——————— CLUB SEARCH ———————
+    const searchInput = document.querySelector('.search-bar input');
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.trim().toLowerCase();
+      document.querySelectorAll('.club-card').forEach(card => {
+        const name = card.querySelector('.club-name').textContent.toLowerCase();
+        card.style.display = name.includes(q) ? '' : 'none';
+      });
+    });
+
   </script>
 </body>
 </html>
